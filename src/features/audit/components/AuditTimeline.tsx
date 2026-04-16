@@ -1,0 +1,87 @@
+import { useEffect, useState } from "react";
+import StatusBadge from "../../../components/ui/StatusBadge";
+import { getAuditRecords } from "../../../services/auditService";
+import type { AuditRecord } from "../../../types/dashboard";
+
+function actionTone(actionType: string) {
+  if (actionType === "Player Banned") return "danger";
+  if (actionType === "Incident Dismissed") return "neutral";
+  if (actionType === "Player Flagged") return "warning";
+  if (actionType === "Status Updated") return "info";
+  if (actionType === "Incident Created") return "warning";
+  return "success";
+}
+
+function AuditTimeline() {
+  const [records, setRecords] = useState<AuditRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadAuditRecords() {
+      try {
+        const data = await getAuditRecords();
+        setRecords(data);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadAuditRecords();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-3xl border border-slate-800 bg-slate-950/50 px-5 py-10 text-center text-sm text-slate-400">
+        Loading audit timeline...
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {records.map((record, index) => (
+        <div key={record.actionId} className="relative flex gap-4">
+          <div className="relative flex flex-col items-center">
+            <div className="z-10 mt-1 h-3.5 w-3.5 rounded-full bg-cyan-400 shadow-[0_0_14px_rgba(34,211,238,0.6)]" />
+            {index !== records.length - 1 && (
+              <div className="mt-2 h-full w-px bg-gradient-to-b from-cyan-500/40 to-slate-800" />
+            )}
+          </div>
+
+          <div className="glass-panel mb-4 flex-1 rounded-3xl p-5 transition duration-300 hover:border-cyan-500/20 hover:shadow-[0_0_20px_rgba(34,211,238,0.06)]">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-semibold text-white">
+                    {record.actionType}
+                  </h3>
+                  <StatusBadge label={record.actionType} tone={actionTone(record.actionType)} />
+                </div>
+
+                <p className="mt-2 text-sm text-slate-300">{record.summary}</p>
+
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-400">
+                  <span>Actor: <span className="text-slate-200">{record.actor}</span></span>
+                  {record.incidentId ? (
+                    <span>
+                      Incident: <span className="text-slate-200">{record.incidentId}</span>
+                    </span>
+                  ) : null}
+                  {record.playerName ? (
+                    <span>
+                      Player: <span className="text-slate-200">{record.playerName}</span>
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="text-xs text-slate-400">{record.timestampRelative}</div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default AuditTimeline;
