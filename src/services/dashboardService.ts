@@ -3,7 +3,7 @@ import {
   incidentTrend,
   overviewKpis,
   recentIncidents,
-} from "../lib/mock-data/dashboard";
+} from "../lib/mock-data/dashboard.ts";
 
 export async function getOverviewKpis() {
   return Promise.resolve(overviewKpis);

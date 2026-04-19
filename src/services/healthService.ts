@@ -2,7 +2,7 @@ import {
   queueHealthRecords,
   reliabilityMetrics,
   serviceHealthRecords,
-} from "../lib/mock-data/dashboard";
+} from "../lib/mock-data/dashboard.ts";
 
 export async function getServiceHealthRecords() {
   return Promise.resolve(serviceHealthRecords);

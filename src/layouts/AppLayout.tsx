@@ -3,20 +3,20 @@ import { NavLink, Outlet } from "react-router-dom";
 import { Menu, X, Shield } from "lucide-react";
 import StatusBadge from "../components/ui/StatusBadge";
 import FloatingMusicPlayer from "../components/media/FloatingMusicPlayer";
-
+import { useAuth } from "../features/auth/AuthContext";
 const navItems = [
-  { label: "Overview", path: "/" },
-  { label: "Incidents", path: "/incidents" },
-  { label: "Players", path: "/players" },
-  { label: "Audit Log", path: "/audit" },
-  { label: "System Health", path: "/health" },
+  { label: "Overview", path: "/app" },
+  { label: "Incidents", path: "/app/incidents" },
+  { label: "Players", path: "/app/players" },
+  { label: "Audit Log", path: "/app/audit" },
+  { label: "System Health", path: "/app/health" },
 ];
 
 function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const { logout } = useAuth();
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+    <div className="relative h-screen overflow-hidden bg-slate-950 text-white">
       <div className="ambient-cloud ambient-cloud-a left-[-120px] top-[120px] h-[260px] w-[260px]" />
       <div className="ambient-cloud ambient-cloud-b right-[-80px] top-[40px] h-[220px] w-[220px]" />
       <div className="ambient-cloud ambient-cloud-a bottom-[80px] left-[30%] h-[180px] w-[180px]" />
@@ -43,7 +43,7 @@ function AppLayout() {
         </button>
       </header>
 
-      <div className="relative flex min-h-screen items-stretch">
+      <div className="relative flex h-full items-stretch">
         {mobileMenuOpen && (
           <div
             className="fixed inset-0 z-20 bg-black/50 backdrop-blur-[2px] lg:hidden"
@@ -81,7 +81,7 @@ function AppLayout() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === "/"}
+                end={item.path === "/app"}
                 onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
                   `block rounded-2xl px-4 py-3 text-sm font-medium transition duration-200 ${
@@ -106,9 +106,16 @@ function AppLayout() {
               <StatusBadge label="System Online" tone="success" />
             </div>
           </div>
+
+          <button
+            onClick={logout}
+            className="mt-4 w-full rounded-2xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+          >
+            Logout
+          </button>
         </aside>
 
-        <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 lg:p-8">
+        <main className="relative z-10 flex-1 h-full min-h-0 overflow-y-auto overflow-x-hidden">
           <Outlet />
         </main>
       </div>
@@ -120,6 +127,11 @@ function AppLayout() {
             audioSrc: "/media/under-the-bright-lights.mp3",
             coverImage: "/media/under-the-bright-lights.jpg",
           },
+           {
+          title: "All Nights",
+            audioSrc: "/media/All-Nights.mp3",
+            coverImage: "/media/All-Nights.jpg",
+           },
         ]}
       />
     </div>

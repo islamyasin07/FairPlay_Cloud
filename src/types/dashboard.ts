@@ -43,6 +43,19 @@ export type RecentIncident = {
   createdAtRelative: string;
 };
 
+export type IncidentMetric = {
+  label: string;
+  value: string;
+  tone?: "info" | "success" | "warning" | "danger";
+};
+
+export type IncidentTimelineEntry = {
+  id: string;
+  label: string;
+  description: string;
+  time: string;
+};
+
 export type IncidentRecord = {
   incidentId: string;
   playerId: string;
@@ -55,6 +68,10 @@ export type IncidentRecord = {
   region: string;
   detectionReason: string;
   createdAtRelative: string;
+  evidenceVideo?: string;
+  evidenceThumbnail?: string;
+  metrics: IncidentMetric[];
+  timeline: IncidentTimelineEntry[];
 };
 
 export type PlayerRiskRecord = {

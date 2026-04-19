@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import StatusBadge from "../../../components/ui/StatusBadge";
+import { usePlayers } from "../hooks/usePlayers";
 import type { PlayerRiskRecord } from "../../../types/dashboard";
-import { getPlayerRiskRecords } from "../../../services/playerService";
 
 function playerStatusTone(status: string) {
   if (status === "Flagged") return "warning";
@@ -19,24 +19,10 @@ function riskTone(score: number) {
 
 function PlayerRiskGrid() {
   const [search, setSearch] = useState("");
-  const [players, setPlayers] = useState<PlayerRiskRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadPlayers() {
-      try {
-        const data = await getPlayerRiskRecords();
-        setPlayers(data);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadPlayers();
-  }, []);
+  const { data: players = [], isLoading, isError } = usePlayers();
 
   const filteredPlayers = useMemo(() => {
-    return players.filter((player) => {
+    return players.filter((player: PlayerRiskRecord) => {
       const q = search.toLowerCase();
       return (
         player.username.toLowerCase().includes(q) ||
@@ -55,6 +41,14 @@ function PlayerRiskGrid() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 px-5 py-10 text-center text-sm text-red-300">
+        Failed to load player risk profiles.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-5">
@@ -68,7 +62,7 @@ function PlayerRiskGrid() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filteredPlayers.map((player) => (
+        {filteredPlayers.map((player: PlayerRiskRecord) => (
           <div
             key={player.playerId}
             className="glass-panel rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:border-cyan-500/20 hover:shadow-[0_0_24px_rgba(34,211,238,0.08)]"

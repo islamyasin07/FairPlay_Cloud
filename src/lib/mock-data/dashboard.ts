@@ -64,7 +64,7 @@ export const recentIncidents: RecentIncident[] = [
   {
     incidentId: "INC-2041",
     playerId: "P-1001",
-    playerName: "GhostByte",
+    playerName: "Nezar Hanani",
     cheatType: "Aimbot",
     severity: "Critical",
     status: "Open",
@@ -111,15 +111,40 @@ export const incidentRecords: IncidentRecord[] = [
   {
     incidentId: "INC-2041",
     playerId: "P-1001",
-    playerName: "GhostByte",
+    playerName: "Nezar Hanani",
     matchId: "M-7781",
     cheatType: "Aimbot",
     severity: "Critical",
     status: "Open",
     riskScore: 94,
     region: "EU-West",
-    detectionReason: "Abnormally high precision and instant target snapping across multiple engagements.",
+    detectionReason:
+      "Abnormally high precision and instant target snapping across multiple engagements.",
     createdAtRelative: "2 min ago",
+    evidenceVideo: "/evidence/NezarHanani-aimbot.mp4",
+    evidenceThumbnail: "/evidence/NezarHanani-aimbot.jpg",
+    metrics: [
+      { label: "Accuracy Spike", value: "98.7%", tone: "danger" },
+      { label: "Reaction Time", value: "43 ms", tone: "warning" },
+      { label: "Headshot Ratio", value: "91%", tone: "danger" },
+      { label: "Aim Lock Events", value: "17", tone: "danger" },
+    ],
+    timeline: [
+      {
+        id: "T1",
+        label: "Detection Created",
+        description:
+          "Suspicious precision anomaly triggered the anti-cheat rule engine.",
+        time: "2 min ago",
+      },
+      {
+        id: "T2",
+        label: "Risk Escalated",
+        description:
+          "Player risk score exceeded the critical investigation threshold.",
+        time: "1 min ago",
+      },
+    ],
   },
   {
     incidentId: "INC-2038",
@@ -131,8 +156,33 @@ export const incidentRecords: IncidentRecord[] = [
     status: "Under Review",
     riskScore: 86,
     region: "ME-Central",
-    detectionReason: "Movement speed exceeded expected thresholds for repeated intervals.",
+    detectionReason:
+      "Movement speed exceeded expected thresholds for repeated intervals.",
     createdAtRelative: "8 min ago",
+    evidenceVideo: "/evidence/zeroping-speedhack.mp4",
+    evidenceThumbnail: "/evidence/zeroping-speedhack.jpg",
+    metrics: [
+      { label: "Peak Movement Speed", value: "2.4x normal", tone: "danger" },
+      { label: "Burst Distance", value: "18.2 m", tone: "warning" },
+      { label: "Abnormal Sprint Events", value: "9", tone: "warning" },
+      { label: "Consistency Score", value: "88%", tone: "info" },
+    ],
+    timeline: [
+      {
+        id: "T1",
+        label: "Detection Created",
+        description:
+          "Movement anomaly threshold exceeded during active match telemetry.",
+        time: "8 min ago",
+      },
+      {
+        id: "T2",
+        label: "Case Updated",
+        description:
+          "Moderator moved the case to Under Review for deeper inspection.",
+        time: "7 min ago",
+      },
+    ],
   },
   {
     incidentId: "INC-2035",
@@ -144,8 +194,38 @@ export const incidentRecords: IncidentRecord[] = [
     status: "Confirmed",
     riskScore: 82,
     region: "EU-West",
-    detectionReason: "Weapon recoil pattern remained unnaturally flat over sustained fire.",
+    detectionReason:
+      "Weapon recoil pattern remained unnaturally flat over sustained fire.",
     createdAtRelative: "14 min ago",
+    evidenceVideo: "/evidence/xrogueaim-norecoil.mp4",
+    evidenceThumbnail: "/evidence/xrogueaim-norecoil.jpg",
+    metrics: [
+      { label: "Recoil Deviation", value: "0.8%", tone: "danger" },
+      { label: "Sustained Burst Length", value: "42 shots", tone: "warning" },
+      { label: "Spread Suppression", value: "93%", tone: "danger" },
+      { label: "Pattern Variance", value: "Very Low", tone: "info" },
+    ],
+    timeline: [
+      {
+        id: "T1",
+        label: "Detection Created",
+        description:
+          "No-recoil signature detected during sustained burst analysis.",
+        time: "14 min ago",
+      },
+      {
+        id: "T2",
+        label: "Manual Review",
+        description: "Evidence clip reviewed by moderation staff.",
+        time: "12 min ago",
+      },
+      {
+        id: "T3",
+        label: "Confirmed",
+        description: "Incident confirmed after evidence verification.",
+        time: "10 min ago",
+      },
+    ],
   },
   {
     incidentId: "INC-2029",
@@ -157,8 +237,39 @@ export const incidentRecords: IncidentRecord[] = [
     status: "Dismissed",
     riskScore: 71,
     region: "NA-East",
-    detectionReason: "Suspicious tracking through obstacles was detected but later judged inconclusive.",
+    detectionReason:
+      "Suspicious tracking through obstacles was detected but later judged inconclusive.",
     createdAtRelative: "23 min ago",
+    evidenceVideo: "/evidence/silentnova-wallhack.mp4",
+    evidenceThumbnail: "/evidence/silentnova-wallhack.jpg",
+    metrics: [
+      { label: "Obstacle Tracking Events", value: "6", tone: "warning" },
+      { label: "Visibility Violations", value: "3", tone: "info" },
+      { label: "Confidence Score", value: "61%", tone: "info" },
+      { label: "Manual Verdict", value: "Inconclusive", tone: "success" },
+    ],
+    timeline: [
+      {
+        id: "T1",
+        label: "Detection Created",
+        description:
+          "Potential vision-through-obstacle behavior was logged.",
+        time: "23 min ago",
+      },
+      {
+        id: "T2",
+        label: "Manual Review",
+        description:
+          "Moderation team reviewed the evidence clip and event metrics.",
+        time: "21 min ago",
+      },
+      {
+        id: "T3",
+        label: "Dismissed",
+        description: "Case closed due to insufficient evidence.",
+        time: "19 min ago",
+      },
+    ],
   },
   {
     incidentId: "INC-2027",
@@ -170,8 +281,33 @@ export const incidentRecords: IncidentRecord[] = [
     status: "Open",
     riskScore: 74,
     region: "EU-West",
-    detectionReason: "Automatic reaction timing appeared consistently inhuman across target acquisition events.",
+    detectionReason:
+      "Automatic reaction timing appeared consistently inhuman across target acquisition events.",
     createdAtRelative: "31 min ago",
+    evidenceVideo: "/evidence/vantastrike-triggerbot.mp4",
+    evidenceThumbnail: "/evidence/vantastrike-triggerbot.jpg",
+    metrics: [
+      { label: "Average Trigger Delay", value: "21 ms", tone: "danger" },
+      { label: "Target Lock Activations", value: "11", tone: "warning" },
+      { label: "Pattern Confidence", value: "79%", tone: "info" },
+      { label: "Manual Review", value: "Pending", tone: "warning" },
+    ],
+    timeline: [
+      {
+        id: "T1",
+        label: "Detection Created",
+        description:
+          "Trigger timing anomaly detected during combat telemetry.",
+        time: "31 min ago",
+      },
+      {
+        id: "T2",
+        label: "Case Queued",
+        description:
+          "Incident waiting for moderator evidence inspection.",
+        time: "29 min ago",
+      },
+    ],
   },
   {
     incidentId: "INC-2024",
@@ -183,8 +319,40 @@ export const incidentRecords: IncidentRecord[] = [
     status: "Under Review",
     riskScore: 96,
     region: "NA-East",
-    detectionReason: "Repeated perfect lock-on movements with near-zero adjustment variance.",
+    detectionReason:
+      "Repeated perfect lock-on movements with near-zero adjustment variance.",
     createdAtRelative: "43 min ago",
+    evidenceVideo: "/evidence/pixelreign-aimbot.mp4",
+    evidenceThumbnail: "/evidence/pixelreign-aimbot.jpg",
+    metrics: [
+      { label: "Lock-On Accuracy", value: "99.2%", tone: "danger" },
+      { label: "Aim Correction Variance", value: "0.3%", tone: "danger" },
+      { label: "Snap Events", value: "22", tone: "danger" },
+      { label: "Review Status", value: "Pending Review", tone: "warning" },
+    ],
+    timeline: [
+      {
+        id: "T1",
+        label: "Detection Created",
+        description:
+          "Repeated aim-lock events triggered critical threat scoring.",
+        time: "43 min ago",
+      },
+      {
+        id: "T2",
+        label: "Escalated",
+        description:
+          "Incident escalated due to repeated cross-match consistency.",
+        time: "40 min ago",
+      },
+      {
+        id: "T3",
+        label: "Under Review",
+        description:
+          "Moderator opened the forensic review workflow.",
+        time: "37 min ago",
+      },
+    ],
   },
 ];
 
@@ -259,7 +427,8 @@ export const auditRecords: AuditRecord[] = [
     incidentId: "INC-2041",
     playerId: "P-1001",
     playerName: "GhostByte",
-    summary: "Critical aimbot suspicion was logged after repeated precision anomalies.",
+    summary:
+      "Critical aimbot suspicion was logged after repeated precision anomalies.",
     timestampRelative: "2 min ago",
   },
   {
@@ -279,7 +448,8 @@ export const auditRecords: AuditRecord[] = [
     incidentId: "INC-2035",
     playerId: "P-1098",
     playerName: "xRogueAim",
-    summary: "Player was banned after repeated no-recoil detections were confirmed.",
+    summary:
+      "Player was banned after repeated no-recoil detections were confirmed.",
     timestampRelative: "13 min ago",
   },
   {
@@ -299,14 +469,16 @@ export const auditRecords: AuditRecord[] = [
     incidentId: "INC-2027",
     playerId: "P-1184",
     playerName: "VantaStrike",
-    summary: "Player entered watchlist after multiple trigger bot signatures were detected.",
+    summary:
+      "Player entered watchlist after multiple trigger bot signatures were detected.",
     timestampRelative: "30 min ago",
   },
   {
     actionId: "ACT-5006",
     actionType: "System Note",
     actor: "System Health Monitor",
-    summary: "Queue latency remained stable during the latest burst simulation window.",
+    summary:
+      "Queue latency remained stable during the latest burst simulation window.",
     timestampRelative: "34 min ago",
   },
 ];
@@ -317,14 +489,16 @@ export const serviceHealthRecords: ServiceHealthRecord[] = [
     status: "Healthy",
     uptime: "99.99%",
     latency: "42 ms",
-    notes: "Inbound request handling remains stable across the latest observation window.",
+    notes:
+      "Inbound request handling remains stable across the latest observation window.",
   },
   {
     service: "Detection Processor",
     status: "Healthy",
     uptime: "99.95%",
     latency: "87 ms",
-    notes: "Suspicious event evaluation is operating within expected thresholds.",
+    notes:
+      "Suspicious event evaluation is operating within expected thresholds.",
   },
   {
     service: "Incident Store",
@@ -338,7 +512,8 @@ export const serviceHealthRecords: ServiceHealthRecord[] = [
     status: "Warning",
     uptime: "99.72%",
     latency: "123 ms",
-    notes: "Minor response delay observed during the last burst simulation.",
+    notes:
+      "Minor response delay observed during the last burst simulation.",
   },
 ];
 

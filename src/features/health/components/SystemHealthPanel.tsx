@@ -1,10 +1,5 @@
-import { useEffect, useState } from "react";
 import StatusBadge from "../../../components/ui/StatusBadge";
-import {
-  getQueueHealthRecords,
-  getReliabilityMetrics,
-  getServiceHealthRecords,
-} from "../../../services/healthService";
+import { useHealthData } from "../hooks/useHealthData";
 import type {
   QueueHealthRecord,
   ReliabilityMetric,
@@ -24,30 +19,7 @@ function queueTone(state: string) {
 }
 
 function SystemHealthPanel() {
-  const [services, setServices] = useState<ServiceHealthRecord[]>([]);
-  const [queues, setQueues] = useState<QueueHealthRecord[]>([]);
-  const [metrics, setMetrics] = useState<ReliabilityMetric[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadHealthData() {
-      try {
-        const [serviceData, queueData, metricData] = await Promise.all([
-          getServiceHealthRecords(),
-          getQueueHealthRecords(),
-          getReliabilityMetrics(),
-        ]);
-
-        setServices(serviceData);
-        setQueues(queueData);
-        setMetrics(metricData);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadHealthData();
-  }, []);
+  const { data, isLoading, isError } = useHealthData();
 
   if (isLoading) {
     return (
@@ -57,10 +29,18 @@ function SystemHealthPanel() {
     );
   }
 
+  if (isError || !data) {
+    return (
+      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 px-5 py-10 text-center text-sm text-red-300">
+        Failed to load health metrics.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {metrics.map((metric) => (
+        {data.metrics.map((metric: ReliabilityMetric) => (
           <div
             key={metric.label}
             className="glass-panel rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:border-cyan-500/20"
@@ -84,7 +64,7 @@ function SystemHealthPanel() {
           </div>
 
           <div className="space-y-4">
-            {services.map((service) => (
+            {data.services.map((service: ServiceHealthRecord) => (
               <div
                 key={service.service}
                 className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 transition duration-300 hover:border-cyan-500/20"
@@ -127,7 +107,7 @@ function SystemHealthPanel() {
           </div>
 
           <div className="space-y-4">
-            {queues.map((queue) => (
+            {data.queues.map((queue: QueueHealthRecord) => (
               <div
                 key={queue.queueName}
                 className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4"

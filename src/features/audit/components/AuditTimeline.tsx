@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
 import StatusBadge from "../../../components/ui/StatusBadge";
-import { getAuditRecords } from "../../../services/auditService";
+import { useAuditRecords } from "../hooks/useAuditRecords";
 import type { AuditRecord } from "../../../types/dashboard";
 
 function actionTone(actionType: string) {
@@ -13,21 +12,7 @@ function actionTone(actionType: string) {
 }
 
 function AuditTimeline() {
-  const [records, setRecords] = useState<AuditRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadAuditRecords() {
-      try {
-        const data = await getAuditRecords();
-        setRecords(data);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadAuditRecords();
-  }, []);
+  const { data: records = [], isLoading, isError } = useAuditRecords();
 
   if (isLoading) {
     return (
@@ -37,9 +22,17 @@ function AuditTimeline() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 px-5 py-10 text-center text-sm text-red-300">
+        Failed to load audit timeline.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {records.map((record, index) => (
+      {records.map((record: AuditRecord, index: number) => (
         <div key={record.actionId} className="relative flex gap-4">
           <div className="relative flex flex-col items-center">
             <div className="z-10 mt-1 h-3.5 w-3.5 rounded-full bg-cyan-400 shadow-[0_0_14px_rgba(34,211,238,0.6)]" />
