@@ -83,6 +83,7 @@ export type PlayerRiskRecord = {
   totalIncidents: number;
   primaryPattern: CheatType;
   lastSeen: string;
+  ipAddress?: string;
 };
 
 export type AuditActionType =
