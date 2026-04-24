@@ -3,8 +3,7 @@ import type {
   ReliabilityMetric,
   ServiceHealthRecord,
 } from "../types/dashboard";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { buildApiUrl } from "./api";
 
 type RawHealthItem = {
   metricId?: string;
@@ -17,7 +16,7 @@ type RawHealthItem = {
 };
 
 export async function getServiceHealthRecords(): Promise<ServiceHealthRecord[]> {
-  const response = await fetch(`${API_BASE_URL}/health`);
+  const response = await fetch(buildApiUrl("/health"));
 
   if (!response.ok) {
     throw new Error("Failed to fetch health metrics");

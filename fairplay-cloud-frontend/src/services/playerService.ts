@@ -1,9 +1,8 @@
 import type { PlayerRiskRecord } from "../types/dashboard";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { buildApiUrl } from "./api";
 
 export async function getPlayerRiskRecords(): Promise<PlayerRiskRecord[]> {
-  const response = await fetch(`${API_BASE_URL}/players`);
+  const response = await fetch(buildApiUrl("/players"));
 
   if (!response.ok) {
     throw new Error("Failed to fetch players");

@@ -1,6 +1,5 @@
 import type { IncidentRecord, IncidentStatus } from "../types/dashboard";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { buildApiUrl } from "./api";
 
 function mapIncident(incident: any): IncidentRecord {
   return {
@@ -23,7 +22,7 @@ function mapIncident(incident: any): IncidentRecord {
 }
 
 export async function getIncidentRecords(): Promise<IncidentRecord[]> {
-  const response = await fetch(`${API_BASE_URL}/incidents`);
+  const response = await fetch(buildApiUrl("/incidents"));
 
   if (!response.ok) {
     throw new Error("Failed to fetch incidents");
@@ -37,7 +36,7 @@ export async function updateIncidentStatus(
   incidentId: string,
   status: IncidentStatus
 ): Promise<IncidentRecord> {
-  const response = await fetch(`${API_BASE_URL}/incidents/${incidentId}/status`, {
+  const response = await fetch(buildApiUrl(`/incidents/${incidentId}/status`), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

@@ -1,9 +1,8 @@
 import type { AuditRecord } from "../types/dashboard";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { buildApiUrl } from "./api";
 
 export async function getAuditRecords(): Promise<AuditRecord[]> {
-  const response = await fetch(`${API_BASE_URL}/audit`);
+  const response = await fetch(buildApiUrl("/audit"));
 
   if (!response.ok) {
     throw new Error("Failed to fetch audit logs");

@@ -4,8 +4,7 @@ import type {
   OverviewTrendPoint,
   RecentIncident,
 } from "../types/dashboard";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { buildApiUrl } from "./api";
 
 type Player = {
   playerId: string;
@@ -34,7 +33,7 @@ type Incident = {
 };
 
 async function fetchPlayers(): Promise<Player[]> {
-  const response = await fetch(`${API_BASE_URL}/players`);
+  const response = await fetch(buildApiUrl("/players"));
 
   if (!response.ok) {
     throw new Error("Failed to fetch players");
@@ -44,7 +43,7 @@ async function fetchPlayers(): Promise<Player[]> {
 }
 
 async function fetchIncidents(): Promise<Incident[]> {
-  const response = await fetch(`${API_BASE_URL}/incidents`);
+  const response = await fetch(buildApiUrl("/incidents"));
 
   if (!response.ok) {
     throw new Error("Failed to fetch incidents");
