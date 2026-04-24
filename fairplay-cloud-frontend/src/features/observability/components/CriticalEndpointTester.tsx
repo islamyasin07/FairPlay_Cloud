@@ -61,8 +61,8 @@ function CriticalEndpointTester({
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-      <div className="space-y-4">
+    <div className="grid gap-6 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
+      <div className="min-w-0 space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
             <span className="text-sm font-medium text-slate-300">Choose endpoint</span>
@@ -103,13 +103,13 @@ function CriticalEndpointTester({
           <p className="mt-3 text-sm leading-6 text-slate-300">{selectedScenario?.description}</p>
         </div>
 
-        <label className="block space-y-2">
+        <label className="block min-w-0 space-y-2">
           <span className="text-sm font-medium text-slate-300">Enter payload</span>
           <textarea
             value={payload}
             onChange={(event) => setPayload(event.target.value)}
             rows={14}
-            className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-4 font-mono text-sm text-slate-200 outline-none transition focus:border-cyan-500/40"
+            className="min-h-[280px] w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-4 font-mono text-sm text-slate-200 outline-none transition focus:border-cyan-500/40"
           />
         </label>
 
@@ -127,8 +127,8 @@ function CriticalEndpointTester({
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-5">
-        <div className="flex items-center justify-between gap-3">
+      <div className="min-w-0 rounded-3xl border border-slate-800 bg-slate-950/60 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="text-lg font-semibold text-white">Test Response Inspector</h3>
             <p className="mt-1 text-sm text-slate-400">
@@ -142,7 +142,7 @@ function CriticalEndpointTester({
           )}
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <p className="text-xs text-slate-400">Status Code</p>
             <p className="mt-2 text-2xl font-semibold text-white">
@@ -163,12 +163,12 @@ function CriticalEndpointTester({
           </div>
         </div>
 
-        <div className="mt-5 rounded-3xl border border-slate-800 bg-slate-950 p-4">
+        <div className="mt-5 min-w-0 rounded-3xl border border-slate-800 bg-slate-950 p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-medium text-slate-200">Response</p>
             <p className="text-xs text-slate-500">Marked automatically from the real HTTP response</p>
           </div>
-          <pre className="max-h-[360px] overflow-auto whitespace-pre-wrap break-words rounded-2xl bg-slate-900/80 p-4 text-xs leading-6 text-slate-300">
+          <pre className="max-h-[360px] min-w-0 overflow-auto whitespace-pre-wrap break-all rounded-2xl bg-slate-900/80 p-4 text-xs leading-6 text-slate-300">
             {result?.responseBody ?? "Run a test to inspect the live backend response here."}
           </pre>
         </div>
