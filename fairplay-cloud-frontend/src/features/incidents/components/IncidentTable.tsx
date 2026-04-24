@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import StatusBadge from "../../../components/ui/StatusBadge";
 import LoadingState from "../../../components/ui/LoadingState";
 import ErrorState from "../../../components/ui/ErrorState";
@@ -23,6 +24,7 @@ function statusTone(status: string) {
 }
 
 function IncidentTable() {
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<IncidentStatus | "All">("All");
   const [selectedIncident, setSelectedIncident] = useState<IncidentRecord | null>(null);
@@ -53,6 +55,8 @@ function IncidentTable() {
       setSelectedIncident((prev) =>
         prev && prev.incidentId === incidentId ? updatedIncident : prev
       );
+
+      await queryClient.invalidateQueries({ queryKey: ["players"] });
     } catch (error) {
       console.error("Failed to update incident status:", error);
       alert("Failed to update incident status.");
