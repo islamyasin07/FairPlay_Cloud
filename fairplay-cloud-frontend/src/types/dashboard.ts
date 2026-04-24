@@ -125,3 +125,29 @@ export type ReliabilityMetric = {
   value: string;
   tone: "success" | "warning" | "danger" | "info";
 };
+
+export type CasePriority = "P0" | "P1" | "P2" | "P3";
+
+export type CaseQueueStatus =
+  | "Needs Triage"
+  | "Under Review"
+  | "Needs Decision"
+  | "Resolved";
+
+export type CaseCommandRecord = {
+  caseId: string;
+  incidentId: string;
+  playerId: string;
+  playerName: string;
+  region: string;
+  cheatType: CheatType;
+  severity: SeverityLevel;
+  riskScore: number;
+  priority: CasePriority;
+  queueStatus: CaseQueueStatus;
+  assignee: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+  slaDueAt: string;
+};

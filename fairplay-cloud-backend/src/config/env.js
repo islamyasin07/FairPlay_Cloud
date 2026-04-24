@@ -23,4 +23,17 @@ export const env = {
   incidentsTable: getEnv("INCIDENTS_TABLE"),
   auditLogsTable: getEnv("AUDITLOGS_TABLE"),
   systemHealthTable: getEnv("SYSTEMHEALTH_TABLE"),
+caseCommandsTable: getEnv("CASE_COMMANDS_TABLE") || "CASE_COMMANDS_TABLE",
 };
+
+console.log("ENV CHECK:", {
+  port: env.port,
+  awsRegion: env.awsRegion,
+  playersTable: env.playersTable,
+  incidentsTable: env.incidentsTable,
+  auditLogsTable: env.auditLogsTable,
+  systemHealthTable: env.systemHealthTable,
+  caseCommandsTable: env.caseCommandsTable,
+  accessKeyLoaded: !!env.awsAccessKeyId,
+  secretKeyLoaded: !!env.awsSecretAccessKey,
+});
