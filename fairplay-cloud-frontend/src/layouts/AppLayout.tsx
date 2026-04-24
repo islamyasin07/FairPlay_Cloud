@@ -7,6 +7,7 @@ import { useAuth } from "../features/auth/AuthContext";
 
 const navItems = [
   { label: "Overview", path: "/app" },
+  { label: "Observability", path: "/app/observability" },
   { label: "Incidents", path: "/app/incidents" },
   { label: "Players", path: "/app/players" },
   { label: "Case Command", path: "/app/cases" },

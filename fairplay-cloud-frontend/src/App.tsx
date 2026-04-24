@@ -7,6 +7,7 @@ import AuditPage from "./pages/AuditPage";
 import HealthPage from "./pages/HealthPage";
 import LoginPage from "./pages/LoginPage";
 import CaseCommandPage from "./pages/CaseCommandPage";
+import ObservabilityPage from "./pages/ObservabilityPage";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       <Route path="/audit" element={<Navigate to="/app/audit" replace />} />
       <Route path="/health" element={<Navigate to="/app/health" replace />} />
       <Route path="/cases" element={<Navigate to="/app/cases" replace />} />
+      <Route path="/observability" element={<Navigate to="/app/observability" replace />} />
 
       <Route
         path="/app"
@@ -29,6 +31,7 @@ function App() {
         }
       >
         <Route index element={<OverviewPage />} />
+        <Route path="observability" element={<ObservabilityPage />} />
         <Route path="incidents" element={<IncidentsPage />} />
         <Route path="players" element={<PlayersPage />} />
         <Route path="audit" element={<AuditPage />} />

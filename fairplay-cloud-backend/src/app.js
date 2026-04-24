@@ -5,6 +5,7 @@ import playerRoutes from "./routes/playerRoutes.js";
 import auditRoutes from "./routes/auditRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import caseCommandRoutes from "./routes/caseCommandRoutes.js";
+import observabilityRoutes from "./routes/observabilityRoutes.js";
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.use("/players", playerRoutes);
 app.use("/audit", auditRoutes);
 app.use("/health", healthRoutes);
 app.use("/case-commands", caseCommandRoutes);
+app.use("/observability", observabilityRoutes);
 
 export default app;
