@@ -5,8 +5,9 @@ import { usePlayers } from "../features/players/hooks/usePlayers";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Flame } from "lucide-react";
 import type { PlayerRiskRecord } from "../types/dashboard";
+import { launchRpg } from "../utils/rpgAnimation";
 
 // Fix leaflet icon missing issues in webpack/vite
 import iconUrl from "leaflet/dist/images/marker-icon.png";
@@ -140,12 +141,19 @@ export default function GlobalIpMapPage() {
             {geoPlayers.map((gp, i) => (
               <Marker key={`${gp.playerId}-${i}`} position={[gp.lat, gp.lon]}>
                 <Popup>
-                  <div className="text-xs">
+                  <div className="text-xs pb-1">
                     <strong className="block text-sm mb-1">{gp.username}</strong>
                     <div><strong>ID:</strong> {gp.playerId}</div>
                     <div><strong>IP:</strong> {gp.ipAddress}</div>
                     <div><strong>Risk:</strong> {gp.riskScore}</div>
-                    <div><strong>Pattern:</strong> {gp.primaryPattern}</div>
+                    <div className="mb-2"><strong>Pattern:</strong> {gp.primaryPattern}</div>
+                    <button 
+                      onClick={launchRpg}
+                      className="mt-2 flex w-full items-center justify-center gap-1 rounded bg-red-900/40 px-2 py-1.5 text-center font-bold text-red-400 hover:bg-red-800/80 hover:text-white transition shadow-sm border border-red-800/50 hover:shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+                    >
+                      <Flame className="h-3 w-3" />
+                      Neutralize Target
+                    </button>
                   </div>
                 </Popup>
               </Marker>

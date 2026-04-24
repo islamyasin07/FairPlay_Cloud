@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { Loader2, MapPinOff } from "lucide-react";
+import { Loader2, MapPinOff, Flame } from "lucide-react";
+import { launchRpg } from "../../../utils/rpgAnimation";
 
 // Fix leaflet icon missing issues in webpack/vite
 import iconUrl from "leaflet/dist/images/marker-icon.png";
@@ -93,8 +94,15 @@ export default function PlayerIpMap({ ipAddress }: PlayerIpMapProps) {
         />
         <Marker position={coordinates}>
           <Popup>
-            <div className="text-xs">
+            <div className="text-xs pb-1">
               <strong>IP:</strong> {ipAddress}
+              <button 
+                onClick={launchRpg}
+                className="mt-3 flex w-full items-center justify-center gap-1 rounded bg-red-900/40 px-2 py-1.5 text-center font-bold text-red-400 hover:bg-red-800/80 hover:text-white transition shadow-sm border border-red-800/50 hover:shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+              >
+                <Flame className="h-3 w-3" />
+                Send RPG
+              </button>
             </div>
           </Popup>
         </Marker>
