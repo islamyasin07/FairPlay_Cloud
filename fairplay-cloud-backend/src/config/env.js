@@ -23,7 +23,7 @@ export const env = {
   incidentsTable: getEnv("INCIDENTS_TABLE"),
   auditLogsTable: getEnv("AUDITLOGS_TABLE"),
   systemHealthTable: getEnv("SYSTEMHEALTH_TABLE"),
-caseCommandsTable: getEnv("CASE_COMMANDS_TABLE") || "CASE_COMMANDS_TABLE",
+caseCommandsTable: getEnv("CASE_COMMANDS_TABLE") 
 };
 
 console.log("ENV CHECK:", {
