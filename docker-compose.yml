@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: ./fairplay-cloud-backend
+    container_name: fairplay-backend
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./fairplay-cloud-backend/.env
+    volumes:
+      - ./fairplay-cloud-backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./fairplay-cloud-frontend
+    container_name: fairplay-frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./fairplay-cloud-frontend/.env
+    depends_on:
+      - backend
+    volumes:
+      - ./fairplay-cloud-frontend:/app
+      - /app/node_modules
