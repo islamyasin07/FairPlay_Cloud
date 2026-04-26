@@ -366,6 +366,7 @@ export const playerRiskRecords: PlayerRiskRecord[] = [
     totalIncidents: 6,
     primaryPattern: "Aimbot",
     lastSeen: "2 min ago",
+    ipAddress: "8.8.8.8",
   },
   {
     playerId: "P-1033",
@@ -376,6 +377,7 @@ export const playerRiskRecords: PlayerRiskRecord[] = [
     totalIncidents: 4,
     primaryPattern: "Speed Hack",
     lastSeen: "8 min ago",
+    ipAddress: "208.67.222.222",
   },
   {
     playerId: "P-1098",

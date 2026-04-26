@@ -10,6 +10,7 @@ const navItems = [
   { label: "Observability", path: "/app/observability" },
   { label: "Incidents", path: "/app/incidents" },
   { label: "Players", path: "/app/players" },
+  { label: "Global Map", path: "/app/map" },
   { label: "Case Command", path: "/app/cases" },
   { label: "Audit Log", path: "/app/audit" },
   { label: "System Health", path: "/app/health" },

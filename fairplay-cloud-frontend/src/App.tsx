@@ -7,7 +7,11 @@ import AuditPage from "./pages/AuditPage";
 import HealthPage from "./pages/HealthPage";
 import LoginPage from "./pages/LoginPage";
 import CaseCommandPage from "./pages/CaseCommandPage";
+
 import ObservabilityPage from "./pages/ObservabilityPage";
+
+import GlobalIpMapPage from "./pages/GlobalIpMapPage";
+
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 
 function App() {
@@ -20,7 +24,11 @@ function App() {
       <Route path="/audit" element={<Navigate to="/app/audit" replace />} />
       <Route path="/health" element={<Navigate to="/app/health" replace />} />
       <Route path="/cases" element={<Navigate to="/app/cases" replace />} />
+
       <Route path="/observability" element={<Navigate to="/app/observability" replace />} />
+
+      <Route path="/map" element={<Navigate to="/app/map" replace />} />
+
 
       <Route
         path="/app"
@@ -37,6 +45,7 @@ function App() {
         <Route path="audit" element={<AuditPage />} />
         <Route path="health" element={<HealthPage />} />
         <Route path="cases" element={<CaseCommandPage />} />
+        <Route path="map" element={<GlobalIpMapPage />} />
       </Route>
     </Routes>
   );

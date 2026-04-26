@@ -1,10 +1,12 @@
 import type {
+  AuditRecord,
   CheatDistributionItem,
   KpiMetric,
   OverviewTrendPoint,
   RecentIncident,
 } from "../types/dashboard";
 import { buildApiUrl } from "./api";
+import { getAuditRecords } from "./auditService";
 
 type Player = {
   playerId: string;
@@ -162,4 +164,11 @@ export async function getRecentIncidents(): Promise<RecentIncident[]> {
       region: incident.region,
       createdAtRelative: incident.createdAt ?? "Unknown time",
     }));
+}
+
+export async function getLiveFeed(): Promise<AuditRecord[]> {
+  const records = await getAuditRecords();
+  
+  // Return the most recent audit records (limit to 5 for live feed snapshot)
+  return records.slice(0, 5);
 }

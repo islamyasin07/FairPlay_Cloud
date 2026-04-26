@@ -7,6 +7,13 @@ import {
 import { dynamo } from "../config/dynamo.js";
 import { env } from "../config/env.js";
 
+function mapIncidentStatusToPlayerStatus(status) {
+  if (status === "Confirmed") return "Banned";
+  if (status === "Under Review") return "Under Observation";
+  if (status === "Dismissed") return "Cleared";
+  return "Flagged";
+}
+
 export async function getAllIncidents() {
   const command = new ScanCommand({
     TableName: env.incidentsTable,
@@ -79,5 +86,35 @@ export async function updateIncidentStatus(incidentId, status) {
   });
 
   const result = await dynamo.send(command);
-  return result.Attributes ?? null;
+  const updatedIncident = result.Attributes ?? null;
+
+  if (updatedIncident?.playerId && env.playersTable) {
+    const playerStatus = mapIncidentStatusToPlayerStatus(status);
+
+    try {
+      await dynamo.send(
+        new UpdateCommand({
+          TableName: env.playersTable,
+          Key: {
+            playerId: updatedIncident.playerId,
+          },
+          UpdateExpression: "SET #status = :status, updatedAt = :updatedAt",
+          ExpressionAttributeNames: {
+            "#status": "status",
+          },
+          ExpressionAttributeValues: {
+            ":status": playerStatus,
+            ":updatedAt": new Date().toISOString(),
+          },
+          ConditionExpression: "attribute_exists(playerId)",
+        })
+      );
+    } catch (error) {
+      if (error?.name !== "ConditionalCheckFailedException") {
+        throw error;
+      }
+    }
+  }
+
+  return updatedIncident;
 }

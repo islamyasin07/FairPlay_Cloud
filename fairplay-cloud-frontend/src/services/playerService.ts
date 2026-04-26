@@ -19,5 +19,6 @@ export async function getPlayerRiskRecords(): Promise<PlayerRiskRecord[]> {
     totalIncidents: Number(player.totalIncidents),
     primaryPattern: player.primaryPattern,
     lastSeen: player.lastSeen,
+    ipAddress: player['IP address'] || player.ipAddress || undefined,
   }));
 }
