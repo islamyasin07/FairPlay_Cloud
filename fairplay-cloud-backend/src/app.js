@@ -5,7 +5,9 @@ import playerRoutes from "./routes/playerRoutes.js";
 import auditRoutes from "./routes/auditRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import caseCommandRoutes from "./routes/caseCommandRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import observabilityRoutes from "./routes/observabilityRoutes.js";
+import { requireAuth } from "./middleware/authMiddleware.js";
 
 const app = express();
 
@@ -18,11 +20,13 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/incidents", incidentRoutes);
-app.use("/players", playerRoutes);
-app.use("/audit", auditRoutes);
-app.use("/health", healthRoutes);
-app.use("/case-commands", caseCommandRoutes);
+app.use("/auth", authRoutes);
 app.use("/observability", observabilityRoutes);
+
+app.use("/incidents", requireAuth, incidentRoutes);
+app.use("/players", requireAuth, playerRoutes);
+app.use("/audit", requireAuth, auditRoutes);
+app.use("/health", requireAuth, healthRoutes);
+app.use("/case-commands", requireAuth, caseCommandRoutes);
 
 export default app;

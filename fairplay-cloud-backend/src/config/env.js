@@ -23,8 +23,24 @@ export const env = {
   incidentsTable: getEnv("INCIDENTS_TABLE"),
   auditLogsTable: getEnv("AUDITLOGS_TABLE"),
   systemHealthTable: getEnv("SYSTEMHEALTH_TABLE"),
-caseCommandsTable: getEnv("CASE_COMMANDS_TABLE") 
+  caseCommandsTable: getEnv("CASE_COMMANDS_TABLE") || "CASE_COMMANDS_TABLE",
+  adminUsersTable: getEnv("ADMINUSERS_TABLE"),
+  jwtSecret: getEnv("JWT_SECRET"),
+  jwtExpiresIn: getEnv("JWT_EXPIRES_IN") || "1d",
+  jwtIssuer: getEnv("JWT_ISSUER") || "fairplay-cloud-backend",
+  jwtAudience: getEnv("JWT_AUDIENCE") || "fairplay-cloud-frontend",
+  bootstrapAdminKey: getEnv("BOOTSTRAP_ADMIN_KEY"),
 };
+
+function validateEnv() {
+  if (!env.jwtSecret || env.jwtSecret.length < 32 || env.jwtSecret === "replace_with_a_long_random_secret") {
+    throw new Error(
+      "JWT_SECRET must be set to a strong secret (at least 32 characters) and not the placeholder value."
+    );
+  }
+}
+
+validateEnv();
 
 console.log("ENV CHECK:", {
   port: env.port,
@@ -34,6 +50,7 @@ console.log("ENV CHECK:", {
   auditLogsTable: env.auditLogsTable,
   systemHealthTable: env.systemHealthTable,
   caseCommandsTable: env.caseCommandsTable,
+  jwtConfigured: Boolean(env.jwtSecret),
   accessKeyLoaded: !!env.awsAccessKeyId,
   secretKeyLoaded: !!env.awsSecretAccessKey,
 });
