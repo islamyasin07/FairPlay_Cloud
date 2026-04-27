@@ -3,7 +3,7 @@ import type {
   ReliabilityMetric,
   ServiceHealthRecord,
 } from "../types/dashboard";
-import { buildApiUrl } from "./api";
+import { apiFetch } from "./api";
 
 type RawHealthItem = {
   metricId?: string;
@@ -16,7 +16,7 @@ type RawHealthItem = {
 };
 
 export async function getServiceHealthRecords(): Promise<ServiceHealthRecord[]> {
-  const response = await fetch(buildApiUrl("/health"));
+  const response = await apiFetch("/health");
 
   if (!response.ok) {
     throw new Error("Failed to fetch health metrics");

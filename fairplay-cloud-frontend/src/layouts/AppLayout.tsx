@@ -2,7 +2,6 @@ import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Menu, X, Shield } from "lucide-react";
 import StatusBadge from "../components/ui/StatusBadge";
-import FloatingMusicPlayer from "../components/media/FloatingMusicPlayer";
 import { useAuth } from "../features/auth/AuthContext";
 
 const navItems = [
@@ -143,20 +142,6 @@ function AppLayout() {
         </main>
       </div>
 
-      <FloatingMusicPlayer
-        tracks={[
-          {
-            title: "Under the Bright Lights",
-            audioSrc: "/media/under-the-bright-lights.mp3",
-            coverImage: "/media/under-the-bright-lights.jpg",
-          },
-          {
-            title: "All Nights",
-            audioSrc: "/media/All-Nights.mp3",
-            coverImage: "/media/All-Nights.jpg",
-          },
-        ]}
-      />
     </div>
   );
 }

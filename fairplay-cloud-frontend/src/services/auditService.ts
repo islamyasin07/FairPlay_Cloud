@@ -1,8 +1,8 @@
 import type { AuditRecord } from "../types/dashboard";
-import { buildApiUrl } from "./api";
+import { apiFetch } from "./api";
 
 export async function getAuditRecords(): Promise<AuditRecord[]> {
-  const response = await fetch(buildApiUrl("/audit"));
+  const response = await apiFetch("/audit");
 
   if (!response.ok) {
     throw new Error("Failed to fetch audit logs");
