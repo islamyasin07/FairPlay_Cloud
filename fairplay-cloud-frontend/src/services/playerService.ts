@@ -1,8 +1,8 @@
 import type { PlayerRiskRecord } from "../types/dashboard";
-import { buildApiUrl } from "./api";
+import { apiFetch } from "./api";
 
 export async function getPlayerRiskRecords(): Promise<PlayerRiskRecord[]> {
-  const response = await fetch(buildApiUrl("/players"));
+  const response = await apiFetch("/players");
 
   if (!response.ok) {
     throw new Error("Failed to fetch players");

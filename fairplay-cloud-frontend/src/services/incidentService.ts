@@ -1,5 +1,5 @@
 import type { IncidentRecord, IncidentStatus } from "../types/dashboard";
-import { buildApiUrl } from "./api";
+import { apiFetch } from "./api";
 
 function mapIncident(incident: any): IncidentRecord {
   return {
@@ -22,7 +22,7 @@ function mapIncident(incident: any): IncidentRecord {
 }
 
 export async function getIncidentRecords(): Promise<IncidentRecord[]> {
-  const response = await fetch(buildApiUrl("/incidents"));
+  const response = await apiFetch("/incidents");
 
   if (!response.ok) {
     throw new Error("Failed to fetch incidents");
@@ -36,7 +36,7 @@ export async function updateIncidentStatus(
   incidentId: string,
   status: IncidentStatus
 ): Promise<IncidentRecord> {
-  const response = await fetch(buildApiUrl(`/incidents/${incidentId}/status`), {
+  const response = await apiFetch(`/incidents/${incidentId}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
