@@ -26,35 +26,35 @@ function SystemHealthPanel() {
   const { data, isLoading, isError } = useHealthData();
 
   if (isLoading) {
-  return (
-    <LoadingState
-      title="Loading health metrics"
-      description="Preparing platform observability and service health indicators."
-    />
-  );
-}
+    return (
+      <LoadingState
+        title="Loading health metrics"
+        description="Preparing platform observability and service health indicators."
+      />
+    );
+  }
 
   if (isError || !data) {
-  return (
-    <ErrorState
-      title="Failed to load health metrics"
-      description="The health monitoring module could not be loaded at this time."
-    />
-  );
-}
+    return (
+      <ErrorState
+        title="Failed to load health metrics"
+        description="The health monitoring module could not be loaded at this time."
+      />
+    );
+  }
 
-if (
-  data.metrics.length === 0 &&
-  data.services.length === 0 &&
-  data.queues.length === 0
-) {
-  return (
-    <EmptyState
-      title="No health data available"
-      description="No system health or reliability metrics are available right now."
-    />
-  );
-}
+  if (
+    data.metrics.length === 0 &&
+    data.services.length === 0 &&
+    data.queues.length === 0
+  ) {
+    return (
+      <EmptyState
+        title="No health data available"
+        description="No system health or reliability metrics are available right now."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -78,7 +78,7 @@ if (
           <div className="mb-5">
             <h3 className="text-xl font-semibold text-white">Service Health</h3>
             <p className="mt-1 text-sm text-slate-400">
-              Simulated operational status across core platform services.
+              Live operational status derived from backend health metrics.
             </p>
           </div>
 
@@ -121,7 +121,7 @@ if (
           <div className="mb-5">
             <h3 className="text-xl font-semibold text-white">Queue Health</h3>
             <p className="mt-1 text-sm text-slate-400">
-              Mock platform queue states used to support the reliability story.
+              Queue signals inferred from the backend health snapshot.
             </p>
           </div>
 

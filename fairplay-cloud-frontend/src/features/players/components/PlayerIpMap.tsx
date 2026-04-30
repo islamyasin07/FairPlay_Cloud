@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { Loader2, MapPinOff, Flame } from "lucide-react";
+import { MapPinOff, Flame } from "lucide-react";
 import { launchRpg } from "../../../utils/rpgAnimation";
 
 // Fix leaflet icon missing issues in webpack/vite
@@ -24,58 +24,33 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface PlayerIpMapProps {
   ipAddress: string;
+  region?: string;
 }
 
-export default function PlayerIpMap({ ipAddress }: PlayerIpMapProps) {
-  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const regionCoordinates: Record<string, [number, number]> = {
+  "NA-East": [39.5, -77.0],
+  "EU-West": [53.0, -6.0],
+  "ME-Central": [25.0, 45.0],
+  "APAC-East": [35.0, 139.0],
+  "SA-South": [-23.5, -46.6],
+};
 
-  useEffect(() => {
-    async function fetchLocation() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(`https://get.geojs.io/v1/ip/geo/${ipAddress}.json`);
-        
-        if (!res.ok) throw new Error("Failed to fetch");
-        
-        const data = await res.json();
-        
-        const lat = parseFloat(data.latitude);
-        const lon = parseFloat(data.longitude);
-        
-        if (!isNaN(lat) && !isNaN(lon)) {
-          setCoordinates([lat, lon]);
-        } else {
-          setError(data.reason || "Failed to locate IP");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Network error");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (ipAddress) {
-      fetchLocation();
-    }
-  }, [ipAddress]);
-
-  if (loading) {
-    return (
-      <div className="flex h-32 w-full items-center justify-center rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-        <Loader2 className="h-5 w-5 animate-spin text-cyan-500" />
-      </div>
-    );
+function coordinatesForRegion(region?: string): [number, number] | null {
+  if (!region) {
+    return null;
   }
 
-  if (error || !coordinates) {
+  return regionCoordinates[region] ?? null;
+}
+
+export default function PlayerIpMap({ ipAddress, region }: PlayerIpMapProps) {
+  const coordinates = useMemo(() => coordinatesForRegion(region), [region]);
+
+  if (!coordinates) {
     return (
       <div className="flex h-32 w-full flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-center text-slate-400">
         <MapPinOff className="mb-2 h-6 w-6 text-slate-500" />
-        <span className="text-xs">{error || "Location unavailable"}</span>
+        <span className="text-xs">Regional map unavailable for {ipAddress}</span>
       </div>
     );
   }

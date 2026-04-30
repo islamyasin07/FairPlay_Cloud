@@ -5,7 +5,13 @@ export async function seedAdmin(req, res) {
   try {
     const suppliedBootstrapKey = req.headers["x-bootstrap-key"];
 
-    if (env.bootstrapAdminKey && suppliedBootstrapKey !== env.bootstrapAdminKey) {
+    if (!env.bootstrapAdminKey) {
+      return res.status(503).json({
+        message: "Bootstrap admin key is not configured.",
+      });
+    }
+
+    if (suppliedBootstrapKey !== env.bootstrapAdminKey) {
       return res.status(403).json({
         message: "Invalid bootstrap key.",
       });

@@ -56,7 +56,7 @@ function IncidentTable() {
         prev && prev.incidentId === incidentId ? updatedIncident : prev
       );
 
-      await queryClient.invalidateQueries({ queryKey: ["players"] });
+      await queryClient.invalidateQueries({ queryKey: ["incidents"] });
     } catch (error) {
       console.error("Failed to update incident status:", error);
       alert("Failed to update incident status.");

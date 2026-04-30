@@ -6,12 +6,11 @@ import PlayersPage from "./pages/PlayersPage";
 import AuditPage from "./pages/AuditPage";
 import HealthPage from "./pages/HealthPage";
 import LoginPage from "./pages/LoginPage";
+import SetupPage from "./pages/SetupPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import CaseCommandPage from "./pages/CaseCommandPage";
-
 import ObservabilityPage from "./pages/ObservabilityPage";
-
 import GlobalIpMapPage from "./pages/GlobalIpMapPage";
-
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 
 function App() {
@@ -19,16 +18,14 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/setup" element={<SetupPage />} />
       <Route path="/incidents" element={<Navigate to="/app/incidents" replace />} />
       <Route path="/players" element={<Navigate to="/app/players" replace />} />
       <Route path="/audit" element={<Navigate to="/app/audit" replace />} />
       <Route path="/health" element={<Navigate to="/app/health" replace />} />
       <Route path="/cases" element={<Navigate to="/app/cases" replace />} />
-
       <Route path="/observability" element={<Navigate to="/app/observability" replace />} />
-
       <Route path="/map" element={<Navigate to="/app/map" replace />} />
-
 
       <Route
         path="/app"
@@ -47,6 +44,8 @@ function App() {
         <Route path="cases" element={<CaseCommandPage />} />
         <Route path="map" element={<GlobalIpMapPage />} />
       </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
