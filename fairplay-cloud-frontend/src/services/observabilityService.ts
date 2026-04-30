@@ -12,7 +12,7 @@ import type {
   TestOutcome,
   TrafficPoint,
 } from "../types/observability";
-import { buildApiUrl } from "./api";
+import { apiFetch, buildApiUrl, withAuthHeaders } from "./api";
 
 function normalizeRoutes(routes: unknown): ApiRouteRecord[] {
   if (!Array.isArray(routes)) return [];
@@ -173,7 +173,7 @@ function normalizeSnapshot(data: unknown): ObservabilitySnapshot {
 }
 
 export async function getObservabilitySnapshot(): Promise<ObservabilitySnapshot> {
-  const response = await fetch(buildApiUrl("/observability"));
+  const response = await apiFetch("/observability");
 
   if (!response.ok) {
     throw new Error("Failed to fetch observability snapshot");
@@ -222,9 +222,9 @@ export async function runCriticalEndpointTest({
   const startedAt = performance.now();
   const response = await fetch(requestUrl.toString(), {
     method,
-    headers: {
+    headers: withAuthHeaders({
       "Content-Type": "application/json",
-    },
+    }),
     body:
       method === "GET" || method === "DELETE"
         ? undefined

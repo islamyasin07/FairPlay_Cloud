@@ -51,6 +51,7 @@ function priorityTone(priority: string) {
 }
 
 function queueTone(status: string) {
+  if (status === "Needs Triage") return "info";
   if (status === "Resolved") return "success";
   if (status === "Needs Decision") return "warning";
   if (status === "Under Review") return "info";
@@ -113,6 +114,11 @@ function CaseCommandBoard() {
 
   const lanes = useMemo<LaneDefinition[]>(
     () => [
+      {
+        title: "Needs Triage",
+        description: "Freshly opened cases waiting for the first moderation review.",
+        filter: (record) => record.queueStatus === "Needs Triage",
+      },
       {
         title: "Critical Open",
         description: "Critical severity cases requiring immediate triage.",

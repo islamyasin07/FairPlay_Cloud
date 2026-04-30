@@ -89,7 +89,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
       </div>
 
       {showMap && player.ipAddress && (
-        <PlayerIpMap ipAddress={player.ipAddress} />
+        <PlayerIpMap ipAddress={player.ipAddress} region={player.region} />
       )}
 
       <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-800">

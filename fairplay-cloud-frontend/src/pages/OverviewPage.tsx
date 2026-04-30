@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ErrorState from "../components/ui/ErrorState";
 import PageHeader from "../components/ui/PageHeader";
 import SectionCard from "../components/ui/SectionCard";
 import StatusBadge from "../components/ui/StatusBadge";
@@ -53,10 +54,13 @@ function OverviewPage() {
   const [incidents, setIncidents] = useState<RecentIncident[]>([]);
   const [liveFeed, setLiveFeed] = useState<AuditRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadOverviewData() {
       try {
+        setLoadError(null);
+
         const [kpiData, trendData, distributionData, recentIncidentData, liveFeedData] =
           await Promise.all([
             getOverviewKpis(),
@@ -71,6 +75,9 @@ function OverviewPage() {
         setDistribution(distributionData);
         setIncidents(recentIncidentData);
         setLiveFeed(liveFeedData);
+      } catch (error) {
+        console.error("Failed to load overview data:", error);
+        setLoadError("The dashboard data could not be loaded at this time.");
       } finally {
         setIsLoading(false);
       }
@@ -92,6 +99,12 @@ function OverviewPage() {
           <p className="text-sm text-slate-400">Preparing system overview modules.</p>
         </SectionCard>
       </>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <ErrorState title="Failed to load overview" description={loadError} />
     );
   }
 

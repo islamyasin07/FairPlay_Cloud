@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useMemo } from "react";
 import PageHeader from "../components/ui/PageHeader";
 import SectionCard from "../components/ui/SectionCard";
 import { usePlayers } from "../features/players/hooks/usePlayers";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Loader2, AlertCircle, Flame } from "lucide-react";
+import { AlertCircle, Flame } from "lucide-react";
 import type { PlayerRiskRecord } from "../types/dashboard";
 import { launchRpg } from "../utils/rpgAnimation";
 
@@ -31,69 +31,43 @@ type PlayerGeo = PlayerRiskRecord & {
   lon: number;
 };
 
+const regionCoordinates: Record<string, [number, number]> = {
+  "NA-East": [39.5, -77.0],
+  "EU-West": [53.0, -6.0],
+  "ME-Central": [25.0, 45.0],
+  "APAC-East": [35.0, 139.0],
+  "SA-South": [-23.5, -46.6],
+};
+
+function coordinatesForRegion(region: string): [number, number] {
+  return regionCoordinates[region] ?? [20, 0];
+}
+
 export default function GlobalIpMapPage() {
   const { data: players = [], isLoading: playersLoading, isError } = usePlayers();
-  const [geoPlayers, setGeoPlayers] = useState<PlayerGeo[]>([]);
-  const [mapLoading, setMapLoading] = useState(false);
 
-  useEffect(() => {
-    let active = true;
+  const geoPlayers = useMemo<PlayerGeo[]>(() => {
+    return players.map((player) => {
+      const [lat, lon] = coordinatesForRegion(player.region);
 
-    async function geocodePlayers() {
-      if (players.length === 0) return;
-      setMapLoading(true);
-
-      const playersWithIp = players.filter((p: PlayerRiskRecord) => !!p.ipAddress);
-      const results: PlayerGeo[] = [];
-
-      for (const player of playersWithIp) {
-        try {
-          const res = await fetch(
-            `https://get.geojs.io/v1/ip/geo/${player.ipAddress}.json`
-          );
-          if (!res.ok) continue;
-          
-          const data = await res.json();
-
-          const lat = parseFloat(data.latitude);
-          const lon = parseFloat(data.longitude);
-
-          if (!isNaN(lat) && !isNaN(lon)) {
-            results.push({
-              ...player,
-              lat,
-              lon,
-            });
-          }
-        } catch (err) {
-          console.warn(`Failed to geocode IP ${player.ipAddress}`, err);
-        }
-      }
-
-      if (active) {
-        setGeoPlayers(results);
-        setMapLoading(false);
-      }
-    }
-
-    geocodePlayers();
-
-    return () => {
-      active = false;
-    };
+      return {
+        ...player,
+        lat,
+        lon,
+      };
+    });
   }, [players]);
 
-  if (playersLoading || mapLoading) {
+  if (playersLoading) {
     return (
       <>
         <PageHeader
-          title="Global IP Tracking"
-          description="A global map visualizing the flagged and active player IPs."
+          title="Global Risk Map"
+          description="A privacy-safe regional map visualizing flagged and active player clusters."
           badge="Geospatial"
         />
         <div className="flex h-64 w-full items-center justify-center rounded-3xl border border-slate-800 bg-slate-950/60 p-4">
-          <Loader2 className="h-6 w-6 animate-spin text-cyan-500" />
-          <span className="ml-3 text-slate-400">Locating Players...</span>
+          <span className="text-slate-400">Loading player regions...</span>
         </div>
       </>
     );
@@ -103,8 +77,8 @@ export default function GlobalIpMapPage() {
     return (
       <>
         <PageHeader
-          title="Global IP Tracking"
-          description="A global map visualizing the flagged and active player IPs."
+          title="Global Risk Map"
+          description="A privacy-safe regional map visualizing flagged and active player clusters."
           badge="Geospatial"
         />
         <div className="flex h-64 w-full flex-col items-center justify-center rounded-3xl border border-red-900/30 bg-red-950/20 p-4 text-center">
@@ -118,8 +92,8 @@ export default function GlobalIpMapPage() {
   return (
     <>
       <PageHeader
-        title="Global IP Tracking"
-        description="A global map visualizing the flagged and active player IPs."
+        title="Global Risk Map"
+        description="A privacy-safe regional map visualizing flagged and active player clusters."
         badge="Geospatial"
       />
 
@@ -144,7 +118,7 @@ export default function GlobalIpMapPage() {
                   <div className="text-xs pb-1">
                     <strong className="block text-sm mb-1">{gp.username}</strong>
                     <div><strong>ID:</strong> {gp.playerId}</div>
-                    <div><strong>IP:</strong> {gp.ipAddress}</div>
+                    <div><strong>Region:</strong> {gp.region}</div>
                     <div><strong>Risk:</strong> {gp.riskScore}</div>
                     <div className="mb-2"><strong>Pattern:</strong> {gp.primaryPattern}</div>
                     <button 

@@ -5,7 +5,7 @@ import type {
   OverviewTrendPoint,
   RecentIncident,
 } from "../types/dashboard";
-import { buildApiUrl } from "./api";
+import { apiFetch } from "./api";
 import { getAuditRecords } from "./auditService";
 
 type Player = {
@@ -35,7 +35,7 @@ type Incident = {
 };
 
 async function fetchPlayers(): Promise<Player[]> {
-  const response = await fetch(buildApiUrl("/players"));
+  const response = await apiFetch("/players");
 
   if (!response.ok) {
     throw new Error("Failed to fetch players");
@@ -45,7 +45,7 @@ async function fetchPlayers(): Promise<Player[]> {
 }
 
 async function fetchIncidents(): Promise<Incident[]> {
-  const response = await fetch(buildApiUrl("/incidents"));
+  const response = await apiFetch("/incidents");
 
   if (!response.ok) {
     throw new Error("Failed to fetch incidents");

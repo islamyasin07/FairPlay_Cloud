@@ -2,51 +2,93 @@ import { useMemo, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
-  Eye,
-  EyeOff,
-  Globe,
+  KeyRound,
   Lock,
   Mail,
   Shield,
   Sparkles,
+  UserCog,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../features/auth/AuthContext";
+import { Link } from "react-router-dom";
+import { buildApiUrl } from "../services/api";
 
-function LoginPage() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
+function SetupPage() {
+  const [bootstrapKey, setBootstrapKey] = useState("");
+  const [adminId, setAdminId] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("Admin");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const canSubmit = useMemo(
-    () => email.trim().length > 0 && password.trim().length > 0,
-    [email, password]
+    () =>
+      bootstrapKey.trim().length > 0 &&
+      adminId.trim().length > 0 &&
+      fullName.trim().length > 0 &&
+      email.trim().length > 0 &&
+      password.trim().length > 0,
+    [bootstrapKey, adminId, fullName, email, password]
   );
 
   const handleSubmit = async () => {
-    setError("");
+    setMessage("");
+    setIsSuccess(false);
 
     if (!canSubmit) {
-      setError("Please enter both email and password.");
+      setMessage("Fill in the bootstrap key and all admin fields.");
       return;
     }
 
     setIsSubmitting(true);
 
-    const result = await login(email, password);
+    try {
+      const response = await fetch(buildApiUrl("/auth/seed-admin"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-bootstrap-key": bootstrapKey,
+        },
+        body: JSON.stringify({
+          adminId,
+          email,
+          fullName,
+          role,
+          password,
+        }),
+      });
 
-    if (result.success) {
-      navigate("/app");
-    } else {
-      setError(result.message ?? "Login failed. Please try again.");
+      if (!response.ok) {
+        let errorMessage = "Failed to create the admin account.";
+
+        try {
+          const errorData = (await response.json()) as { message?: string };
+          if (errorData?.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          // Keep the default error message.
+        }
+
+        setMessage(errorMessage);
+        return;
+      }
+
+      setIsSuccess(true);
+      setMessage("Admin account created successfully. You can now sign in.");
+      setBootstrapKey("");
+      setAdminId("");
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      setRole("Admin");
+    } catch {
+      setMessage("Unable to reach the backend. Check the server and try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (
@@ -56,44 +98,37 @@ function LoginPage() {
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-[1.1fr_0.9fr]">
         <section className="relative hidden overflow-hidden border-r border-white/10 lg:block">
-          <video
-            className="absolute inset-0 h-full w-full object-cover opacity-35"
-            src="/media/login-cs2.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-          />
+          <div className="absolute inset-0 bg-[url('/media/worldLow.svg')] bg-cover bg-center opacity-15" />
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950/30 via-slate-950/35 to-slate-900/90" />
 
           <div className="relative flex h-full flex-col justify-between p-12">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
                 <Sparkles className="h-3.5 w-3.5" />
-                Secure Control Surface
+                First Deployment Setup
               </div>
 
               <div className="mt-8 max-w-xl">
                 <h1 className="text-5xl font-black leading-[0.95] tracking-tight text-white">
                   <span className="block bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300 bg-clip-text text-transparent">
-                    FairPlay Cloud
+                    Seed the first admin
                   </span>
                   <span className="mt-4 block text-slate-100">
-                    Anti-cheat operations, designed like a flagship console.
+                    Create the initial moderator account without touching the database manually.
                   </span>
                 </h1>
 
                 <p className="mt-6 max-w-lg text-base leading-7 text-slate-300">
-                  This is the command center for moderation, incidents, and visibility. The interface is built to feel premium, decisive, and unmistakably serious.
+                  This page closes the first-run gap. Enter the bootstrap key from the backend environment and create the first admin user before signing in.
                 </p>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
               {[
-                ["Protected", "JWT + Backend Guard"],
-                ["Persistent", "Player stays alive everywhere"],
-                ["Fast", "Optimized media and routes"],
+                ["One-Time", "Bootstrap is disabled after the first admin exists."],
+                ["Controlled", "Backend key required for every seed request."],
+                ["Ready", "Redirect straight into the login flow."],
               ].map(([title, text]) => (
                 <div
                   key={title}
@@ -119,7 +154,7 @@ function LoginPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200/80">
                   FairPlay Cloud
                 </p>
-                <p className="text-xs text-slate-400">Moderator access portal</p>
+                <p className="text-xs text-slate-400">Bootstrap setup portal</p>
               </div>
             </div>
 
@@ -131,34 +166,18 @@ function LoginPage() {
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-200">
                     <BadgeCheck className="h-3.5 w-3.5" />
-                    Protected Access
+                    Initial Admin Setup
                   </div>
                   <h2 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                    Sign in to continue
+                    Create the first admin
                   </h2>
                   <p className="mt-3 max-w-md text-sm leading-6 text-slate-300">
-                    One secure login opens the full incident dashboard, player controls, and analytics suite.
+                    Seed the first account directly from the UI instead of using a manual API call.
                   </p>
                 </div>
 
                 <div className="hidden rounded-2xl border border-cyan-400/15 bg-cyan-400/10 p-3 sm:block">
-                  <Globe className="h-6 w-6 text-cyan-200" />
-                </div>
-              </div>
-
-              <div className="mt-8 rounded-3xl border border-white/10 bg-slate-950/45 p-5">
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/media/worldLow.svg"
-                    alt="Global signal"
-                    className="h-12 w-12 rounded-2xl border border-cyan-400/10 bg-slate-900/60 object-cover p-2"
-                  />
-                  <div>
-                    <p className="text-sm font-semibold text-white">Secure Gateway</p>
-                    <p className="text-xs text-slate-400">
-                      Authentication is required for every protected action.
-                    </p>
-                  </div>
+                  <UserCog className="h-6 w-6 text-cyan-200" />
                 </div>
               </div>
 
@@ -171,6 +190,55 @@ function LoginPage() {
               >
                 <label className="block">
                   <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Bootstrap key
+                  </span>
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400/40 focus-within:bg-slate-950/85">
+                    <KeyRound className="h-4 w-4 text-slate-500" />
+                    <input
+                      type="password"
+                      value={bootstrapKey}
+                      onChange={(e) => setBootstrapKey(e.target.value)}
+                      placeholder="Backend bootstrap key"
+                      autoComplete="off"
+                      className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Admin ID
+                  </span>
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400/40 focus-within:bg-slate-950/85">
+                    <UserCog className="h-4 w-4 text-slate-500" />
+                    <input
+                      type="text"
+                      value={adminId}
+                      onChange={(e) => setAdminId(e.target.value)}
+                      placeholder="admin-001"
+                      className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Full name
+                  </span>
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400/40 focus-within:bg-slate-950/85">
+                    <Shield className="h-4 w-4 text-slate-500" />
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="FairPlay Administrator"
+                      className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                     Email
                   </span>
                   <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400/40 focus-within:bg-slate-950/85">
@@ -180,9 +248,27 @@ function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="admin@fairplay.local"
-                      autoComplete="username"
+                      autoComplete="email"
                       className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
                     />
+                  </div>
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Role
+                  </span>
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400/40 focus-within:bg-slate-950/85">
+                    <Shield className="h-4 w-4 text-slate-500" />
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="w-full bg-transparent text-sm text-white outline-none"
+                    >
+                      <option value="Admin">Admin</option>
+                      <option value="Moderator">Moderator</option>
+                      <option value="Super Admin">Super Admin</option>
+                    </select>
                   </div>
                 </label>
 
@@ -193,30 +279,25 @@ function LoginPage() {
                   <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400/40 focus-within:bg-slate-950/85">
                     <Lock className="h-4 w-4 text-slate-500" />
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      autoComplete="current-password"
+                      placeholder="Create a secure password"
+                      autoComplete="new-password"
                       className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="rounded-lg p-1 text-slate-500 transition hover:bg-white/5 hover:text-cyan-200"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
                   </div>
                 </label>
 
-                {error && (
-                  <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                    {error}
+                {message && (
+                  <div
+                    className={`rounded-2xl border px-4 py-3 text-sm ${
+                      isSuccess
+                        ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
+                        : "border-red-500/25 bg-red-500/10 text-red-200"
+                    }`}
+                  >
+                    {message}
                   </div>
                 )}
 
@@ -226,7 +307,7 @@ function LoginPage() {
                   className="group relative mt-2 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 px-5 py-3.5 font-semibold text-slate-950 shadow-[0_18px_36px_rgba(34,211,238,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_44px_rgba(34,211,238,0.24)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span className="relative flex items-center justify-center gap-2">
-                    {isSubmitting ? "Verifying access..." : "Enter the console"}
+                    {isSubmitting ? "Seeding admin..." : "Create first admin"}
                     {!isSubmitting && (
                       <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                     )}
@@ -235,27 +316,15 @@ function LoginPage() {
                 </button>
               </form>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {[
-                  ["Locked Down", "Only authorized users can reach protected routes."],
-                  ["Persistent Player", "Ambient audio stays available across pages."],
-                ].map(([title, text]) => (
-                  <div
-                    key={title}
-                    className="rounded-2xl border border-white/10 bg-slate-950/45 p-4"
-                  >
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200/80">
-                      {title}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">{text}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-cyan-400/15 bg-cyan-400/10 px-4 py-3 text-sm text-slate-200">
-                <span>Need to seed the first admin?</span>
-                <Link to="/setup" className="font-semibold text-cyan-200 transition hover:text-cyan-100">
-                  Open setup
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-slate-400">
+                  After the first admin exists, the seed endpoint is disabled.
+                </p>
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-cyan-300 transition hover:text-cyan-200"
+                >
+                  Back to login
                 </Link>
               </div>
             </div>
@@ -266,4 +335,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default SetupPage;

@@ -1,6 +1,5 @@
 import type { CaseCommandRecord, CaseQueueStatus } from "../types/dashboard";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiFetch } from "./api";
 
 function mapCaseRecord(record: any): CaseCommandRecord {
   return {
@@ -23,7 +22,7 @@ function mapCaseRecord(record: any): CaseCommandRecord {
 }
 
 export async function getCaseCommandRecords(): Promise<CaseCommandRecord[]> {
-  const response = await fetch(`${API_BASE_URL}/case-commands`);
+  const response = await apiFetch("/case-commands");
 
   if (!response.ok) {
     throw new Error("Failed to fetch case commands");
@@ -43,7 +42,7 @@ export async function updateCaseCommandRecord(
     slaDueAt: string;
   }>
 ): Promise<CaseCommandRecord> {
-  const response = await fetch(`${API_BASE_URL}/case-commands/${caseId}`, {
+  const response = await apiFetch(`/case-commands/${caseId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -63,7 +62,7 @@ export async function bootstrapCaseCommands(limit = 200): Promise<{
   createdCount: number;
   records: CaseCommandRecord[];
 }> {
-  const response = await fetch(`${API_BASE_URL}/case-commands/bootstrap`, {
+  const response = await apiFetch("/case-commands/bootstrap", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
