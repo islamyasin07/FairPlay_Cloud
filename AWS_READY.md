@@ -119,12 +119,18 @@ AWS SDK
 
 ### 💡 Next Phase (Post-AWS)
 - [ ] Implement automated testing (Jest + Supertest)
-- [ ] Setup CloudWatch monitoring + alerts
+- [ ] Setup CloudWatch alarms and SNS notifications for the new telemetry
 - [ ] Create database backup strategy
 - [ ] Implement rate limiting
 - [ ] Add admin dashboard features
 - [ ] Setup CI/CD pipeline (GitHub Actions → ECR → ECS)
 - [ ] Security audit (penetration testing)
+
+### 📡 Monitoring Added in Code
+- Request telemetry now logs JSON to stdout for CloudWatch ingestion
+- `/health/live` is unauthenticated for ALB and synthetic checks
+- `/health/ready` reports dependency readiness and returns 503 when config is incomplete
+- `/monitoring` returns a monitoring snapshot with process, memory, and AWS config status
 
 ## 🎯 Final Checklist Before Going Live
 
@@ -140,5 +146,10 @@ AWS SDK
 - [ ] All core features tested in production
 - [ ] Monitoring enabled
 - [ ] Backups configured
+
+### 🔍 Verification Additions
+- [ ] `/health/live` responds without auth
+- [ ] `/health/ready` returns 200 only when config is complete
+- [ ] `/monitoring` returns runtime and readiness data
 
 **You are ~80% ready. Secure your credentials now, then deploy!**
