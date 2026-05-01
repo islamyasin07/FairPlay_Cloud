@@ -30,6 +30,14 @@ export const env = {
   jwtIssuer: getEnv("JWT_ISSUER") || "fairplay-cloud-backend",
   jwtAudience: getEnv("JWT_AUDIENCE") || "fairplay-cloud-frontend",
   bootstrapAdminKey: getEnv("BOOTSTRAP_ADMIN_KEY"),
+  s3BucketName: getEnv("S3_BUCKET_NAME") || "fairplay-cloud-evidence",
+  s3EvidencePrefix: getEnv("S3_EVIDENCE_PREFIX") || "incidents/",
+  s3CaseDocsPrefix: getEnv("S3_CASE_DOCS_PREFIX") || "case-commands/",
+  s3PlayerProfilesPrefix: getEnv("S3_PLAYER_PROFILES_PREFIX") || "players/",
+  s3AuditPrefix: getEnv("S3_AUDIT_PREFIX") || "audit/",
+  cloudfrontDomain: getEnv("CLOUDFRONT_DOMAIN"),
+  presignedUrlExpiryUpload: Number(getEnv("PRESIGNED_URL_EXPIRY_UPLOAD")) || 900,
+  presignedUrlExpiryDownload: Number(getEnv("PRESIGNED_URL_EXPIRY_DOWNLOAD")) || 604800,
 };
 
 function validateEnv() {
