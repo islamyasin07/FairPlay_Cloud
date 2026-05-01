@@ -150,15 +150,15 @@ The backend will detect the IAM role automatically when running on EC2/ECS via i
 
 Before moving to backend code, verify:
 
-- [ ] S3 bucket `fairplay-cloud-evidence` exists
-- [ ] Versioning is **Enabled**
-- [ ] Default encryption is **SSE-S3**
-- [ ] All 4 "Block public access" boxes are **checked**
-- [ ] IAM role `FairPlayCloudBackendRole` exists
-- [ ] Role has inline policy `FairPlayCloudS3Access` with S3 permissions
+- [x] S3 bucket `fairplay-cloud-evidence` exists
+- [x] Versioning is **Enabled**
+- [x] Default encryption is **SSE-S3**
+- [x] All 4 "Block public access" boxes are **checked**
+- [x] IAM role `FairPlayCloudBackendRole` exists
+- [x] Role has inline policy `FairPlayCloudS3Access` with S3 permissions
 - [ ] Access key created and saved
-- [ ] CloudFront distribution status is **Enabled** and you have the domain name
-- [ ] CloudFront can access S3 (bucket policy updated)
+- [x] CloudFront distribution status is **Enabled** and you have the domain name
+- [x] CloudFront can access S3 (bucket policy updated)
 - [ ] Secret stored in AWS Secrets Manager as `fairplay/s3-credentials`
 
 ---
