@@ -87,14 +87,10 @@ Your current AWS credentials are exposed in `.env`. **Do this FIRST before anyth
 6. Name: `FairPlayCloudS3Access`
 7. Click **Create policy**
 
-#### 2.2: Create Access Key (Temporary - for local development)
-1. Go to [IAM Users Console](https://console.aws.amazon.com/iam/home#/users)
-2. Click your user name
-3. **Security credentials** tab
-4. Click **Create access key**
-5. Select **Local code** → **Next**
-6. Copy the **Access Key ID** and **Secret Access Key** somewhere safe
-7. Keep this browser tab open — you'll need these values for `.env`
+#### 2.2: (Production Only) Attach Role to EC2/ECS Instance
+- **For EC2**: Create an Instance Profile, attach `FairPlayCloudBackendRole` to it, then assign to your EC2 instance
+- **For ECS**: When creating the task definition, set the task role to `FairPlayCloudBackendRole`
+- **For Local Testing**: If you need to test locally, create a temporary access key from your user account
 
 ---
 
@@ -130,23 +126,23 @@ The distribution creation will show a message: "Update the S3 bucket policy"
 
 ---
 
-### Step 4: Create AWS Secrets Manager Secret (For Production)
+### Step 4: Update Backend .env (Production)
 
-1. Go to [AWS Secrets Manager Console](https://console.aws.amazon.com/secretsmanager/home)
-2. Click **Store a new secret**
-3. Select **Other type of secret** → **Plaintext**
-4. Paste this (replace with your actual credentials from Step 2.2):
+Since the backend runs on EC2/ECS with the `FairPlayCloudBackendRole` attached, you **do NOT need AWS credentials in `.env`**. The backend will automatically use the IAM role.
 
-```json
-{
-  "accessKeyId": "YOUR_ACCESS_KEY_FROM_STEP_2.2",
-  "secretAccessKey": "YOUR_SECRET_KEY_FROM_STEP_2.2"
-}
+Update your `.env` with only:
+
+```bash
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=fairplay-cloud-evidence
+CLOUDFRONT_DOMAIN=https://YOUR_CLOUDFRONT_DOMAIN_FROM_STEP_3.2
 ```
 
-5. Click **Next**
-6. Secret name: `fairplay/s3-credentials`
-7. Click **Store**
+**Do NOT include:**
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+The backend will detect the IAM role automatically when running on EC2/ECS via instance metadata service.
 
 ---
 
@@ -169,17 +165,10 @@ Before moving to backend code, verify:
 
 ## Next Steps
 
-Once you've completed all steps above, update these values in your backend `.env`:
-
-```bash
-AWS_REGION=us-east-1
-S3_BUCKET_NAME=fairplay-cloud-evidence
-CLOUDFRONT_DOMAIN=https://d123456789.cloudfront.net  # Replace with your domain
-AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_FROM_STEP_2.2
-AWS_SECRET_ACCESS_KEY=YOUR_SECRET_KEY_FROM_STEP_2.2
-```
-
-(In production, credentials come from Secrets Manager/IAM roles instead of `.env`)
+1. Complete AWS setup steps 1-4 above
+2. Deploy backend to EC2/ECS with `FairPlayCloudBackendRole` attached
+3. Backend will automatically use IAM role credentials from instance metadata
+4. No credentials needed in `.env` for production
 
 ---
 

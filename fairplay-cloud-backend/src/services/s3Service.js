@@ -9,13 +9,21 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "../config/env.js";
 
 // Initialize S3 client
-const s3Client = new S3Client({
+// In production on EC2/ECS: uses IAM role credentials from instance metadata automatically
+// For local testing: falls back to environment variables if provided
+const s3ClientConfig = {
   region: env.awsRegion,
-  credentials: {
+};
+
+if (env.awsAccessKeyId && env.awsSecretAccessKey) {
+  s3ClientConfig.credentials = {
     accessKeyId: env.awsAccessKeyId,
     secretAccessKey: env.awsSecretAccessKey,
-  },
-});
+  };
+}
+// If no credentials in env, SDK will automatically use IAM role from EC2/ECS instance metadata
+
+const s3Client = new S3Client(s3ClientConfig);
 
 /**
  * Generate a presigned URL for uploading a file to S3
