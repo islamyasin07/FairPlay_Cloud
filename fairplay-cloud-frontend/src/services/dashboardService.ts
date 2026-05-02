@@ -34,6 +34,14 @@ type Incident = {
   updatedAt?: string;
 };
 
+type CloudWatchOverviewChartsResponse = {
+  source: "cloudwatch" | "fallback";
+  cloudWatchConfigured: boolean;
+  trend: OverviewTrendPoint[];
+  distribution: CheatDistributionItem[];
+  message: string | null;
+};
+
 async function fetchPlayers(): Promise<Player[]> {
   const response = await apiFetch("/players");
 
@@ -49,6 +57,16 @@ async function fetchIncidents(): Promise<Incident[]> {
 
   if (!response.ok) {
     throw new Error("Failed to fetch incidents");
+  }
+
+  return response.json();
+}
+
+async function fetchCloudWatchOverviewCharts(): Promise<CloudWatchOverviewChartsResponse | null> {
+  const response = await apiFetch("/monitoring/overview-charts");
+
+  if (!response.ok) {
+    return null;
   }
 
   return response.json();
@@ -104,6 +122,12 @@ export async function getOverviewKpis(): Promise<KpiMetric[]> {
 }
 
 export async function getIncidentTrend(): Promise<OverviewTrendPoint[]> {
+  const cloudWatchCharts = await fetchCloudWatchOverviewCharts();
+
+  if (cloudWatchCharts && cloudWatchCharts.source === "cloudwatch" && cloudWatchCharts.trend.length > 0) {
+    return cloudWatchCharts.trend;
+  }
+
   const incidents = await fetchIncidents();
 
   const grouped = new Map<string, number>();
@@ -126,6 +150,16 @@ export async function getIncidentTrend(): Promise<OverviewTrendPoint[]> {
 }
 
 export async function getCheatDistribution(): Promise<CheatDistributionItem[]> {
+  const cloudWatchCharts = await fetchCloudWatchOverviewCharts();
+
+  if (
+    cloudWatchCharts &&
+    cloudWatchCharts.source === "cloudwatch" &&
+    cloudWatchCharts.distribution.length > 0
+  ) {
+    return cloudWatchCharts.distribution;
+  }
+
   const incidents = await fetchIncidents();
 
   const counts = new Map<string, number>();

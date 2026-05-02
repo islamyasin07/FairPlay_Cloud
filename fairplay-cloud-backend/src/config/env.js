@@ -30,6 +30,28 @@ export const env = {
   jwtIssuer: getEnv("JWT_ISSUER") || "fairplay-cloud-backend",
   jwtAudience: getEnv("JWT_AUDIENCE") || "fairplay-cloud-frontend",
   bootstrapAdminKey: getEnv("BOOTSTRAP_ADMIN_KEY"),
+  cloudWatchOverviewNamespace:
+    getEnv("CLOUDWATCH_OVERVIEW_NAMESPACE") || "FairPlay/Overview",
+  cloudWatchTrendMetricName:
+    getEnv("CLOUDWATCH_TREND_METRIC_NAME") || "ThreatActivityCount",
+  cloudWatchTrendStatistic:
+    getEnv("CLOUDWATCH_TREND_STATISTIC") || "Sum",
+  cloudWatchTrendPeriodSeconds:
+    Number(getEnv("CLOUDWATCH_TREND_PERIOD_SECONDS")) || 3600,
+  cloudWatchTrendLookbackHours:
+    Number(getEnv("CLOUDWATCH_TREND_LOOKBACK_HOURS")) || 12,
+  cloudWatchTrendDimensions: getEnv("CLOUDWATCH_TREND_DIMENSIONS") || "",
+  cloudWatchDistributionMetricName:
+    getEnv("CLOUDWATCH_DISTRIBUTION_METRIC_NAME") || "ThreatActivityCount",
+  cloudWatchDistributionStatistic:
+    getEnv("CLOUDWATCH_DISTRIBUTION_STATISTIC") || "Sum",
+  cloudWatchDistributionDimensionName:
+    getEnv("CLOUDWATCH_DISTRIBUTION_DIMENSION_NAME") || "CheatType",
+  cloudWatchDistributionCategories:
+    getEnv("CLOUDWATCH_DISTRIBUTION_CATEGORIES") ||
+    "Aimbot,Speed Hack,No Recoil,Wallhack,Trigger Bot",
+  cloudWatchBaseDimensions:
+    getEnv("CLOUDWATCH_BASE_DIMENSIONS") || "",
 };
 
 function validateEnv() {
@@ -53,4 +75,7 @@ console.log("ENV CHECK:", {
   jwtConfigured: Boolean(env.jwtSecret),
   accessKeyLoaded: !!env.awsAccessKeyId,
   secretKeyLoaded: !!env.awsSecretAccessKey,
+  cloudWatchOverviewNamespace: env.cloudWatchOverviewNamespace,
+  cloudWatchTrendMetricName: env.cloudWatchTrendMetricName,
+  cloudWatchDistributionMetricName: env.cloudWatchDistributionMetricName,
 });
