@@ -1,16 +1,9 @@
 import express from "express";
 import cors from "cors";
-import incidentRoutes from "./routes/incidentRoutes.js";
-import playerRoutes from "./routes/playerRoutes.js";
-import auditRoutes from "./routes/auditRoutes.js";
-import healthRoutes from "./routes/healthRoutes.js";
-import caseCommandRoutes from "./routes/caseCommandRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import observabilityRoutes from "./routes/observabilityRoutes.js";
-import monitoringRoutes from "./routes/monitoringRoutes.js";
 import { requestTelemetry } from "./middleware/requestTelemetryMiddleware.js";
 import { env } from "./config/env.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
+import { mountedRouteDefinitions } from "./config/routeRegistry.js";
 
 const app = express();
 
@@ -63,14 +56,13 @@ app.get("/health/ready", (req, res) => {
   });
 });
 
-app.use("/auth", authRoutes);
-app.use("/observability", observabilityRoutes);
-app.use("/monitoring", monitoringRoutes);
+mountedRouteDefinitions.forEach((definition) => {
+  if (definition.authRequired) {
+    app.use(definition.basePath, requireAuth, definition.router);
+    return;
+  }
 
-app.use("/incidents", requireAuth, incidentRoutes);
-app.use("/players", requireAuth, playerRoutes);
-app.use("/audit", requireAuth, auditRoutes);
-app.use("/health", healthRoutes);
-app.use("/case-commands", requireAuth, caseCommandRoutes);
+  app.use(definition.basePath, definition.router);
+});
 
 export default app;

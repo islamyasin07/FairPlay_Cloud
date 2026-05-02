@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { recordRequestTelemetry } from "../services/telemetryStore.js";
 
 function toSampleRate(value, fallback = 1) {
   const parsed = Number(value);
@@ -35,6 +36,7 @@ export function requestTelemetry(req, res, next) {
       ip: req.ip,
     };
 
+    recordRequestTelemetry(payload);
     console.log(JSON.stringify(payload));
   });
 

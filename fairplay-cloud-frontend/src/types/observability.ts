@@ -19,6 +19,10 @@ export type ApiRouteRecord = {
   lastTestResult: TestOutcome;
   averageLatencyMs: number;
   lastCheckedAt: string;
+  requestCount: number;
+  lastObservedStatusCode: number | null;
+  lastObservedAt: string;
+  source: "runtime_telemetry" | "service_metrics";
 };
 
 export type ApiLiveStatusRecord = {
@@ -104,6 +108,22 @@ export type CommunicationMetrics = {
   connectionStability: ConnectionStability;
 };
 
+export type ObservabilitySourceSummary = {
+  snapshotGeneratedAt: string;
+  dataFreshness: string;
+  entityCounts: {
+    players: number;
+    incidents: number;
+    auditLogs: number;
+    healthMetrics: number;
+  };
+  telemetry: {
+    recentRequests: number;
+    observedRoutes: number;
+    catalogRoutes: number;
+  };
+};
+
 export type ObservabilitySnapshot = {
   routes: ApiRouteRecord[];
   liveStatuses: ApiLiveStatusRecord[];
@@ -113,4 +133,5 @@ export type ObservabilitySnapshot = {
   resourceTrend: ResourcePoint[];
   trafficTrend: TrafficPoint[];
   requestLogs: RequestLogRecord[];
+  source: ObservabilitySourceSummary;
 };
