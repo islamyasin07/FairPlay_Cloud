@@ -26,7 +26,7 @@ app.use("/observability", observabilityRoutes);
 app.use("/incidents", requireAuth, incidentRoutes);
 app.use("/players", requireAuth, playerRoutes);
 app.use("/audit", requireAuth, auditRoutes);
-app.use("/health", requireAuth, healthRoutes);
+app.use("/health", healthRoutes);
 app.use("/case-commands", requireAuth, caseCommandRoutes);
 
 export default app;

@@ -93,6 +93,12 @@ Go to AWS Console → DynamoDB → Tables → Create table
 ### Step 3.1: Create ECR Repos via AWS Console
 Go to AWS Console → ECR → Repositories → Create repository
 
+**Important:** the IAM user used for pushing images must have ECR permissions. If `aws ecr get-login-password` returns `AccessDeniedException`, attach one of these policies to the user:
+- `AmazonEC2ContainerRegistryPowerUser` (recommended)
+- `AmazonEC2ContainerRegistryFullAccess` (broader)
+
+The push step cannot continue until `ecr:GetAuthorizationToken` is allowed.
+
 **Repository 1:**
 - Name: `fairplay-backend`
 - Tag immutability: Disabled
@@ -107,7 +113,7 @@ Go to AWS Console → ECR → Repositories → Create repository
 ### Step 3.2: Push Docker Images to ECR
 ```bash
 # Get your AWS account ID
-$ACCOUNT_ID = aws sts get-caller-identity --query Account --output text
+$ACCOUNT_ID = "044079591029"
 $REGION = "us-east-1"
 
 # Login to ECR

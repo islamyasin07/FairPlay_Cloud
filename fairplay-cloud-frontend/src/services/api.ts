@@ -1,6 +1,12 @@
-const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+const fallbackApiBaseUrl = "http://35.174.0.74:3001";
+const rawApiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").trim();
 
-const normalizedApiBaseUrl = rawApiBaseUrl.replace(/\/+$/, "");
+const normalizedApiBaseUrl =
+  import.meta.env.DEV &&
+  (rawApiBaseUrl.length === 0 || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(rawApiBaseUrl))
+    ? fallbackApiBaseUrl
+    : rawApiBaseUrl
+        .replace(/\/+$/, "");
 const AUTH_TOKEN_STORAGE_KEY = "fairplay-auth-token";
 
 export function buildApiUrl(path: string): string {
