@@ -1,0 +1,85 @@
+name: Deploy Backend Docker Image to EC2
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "fairplay-cloud-backend/**"
+      - ".github/workflows/deploy-backend.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      BACKEND_DIR: fairplay-cloud-backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push backend image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./$BACKEND_DIR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy latest image on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          BACKEND_CONTAINER_NAME: ${{ secrets.BACKEND_CONTAINER_NAME }}
+          BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,BACKEND_CONTAINER_NAME,BACKEND_PORT
+          script: |
+            set -e
+
+            echo "Logging in to ECR from EC2..."
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            echo "Pulling latest backend image..."
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+            echo "Stopping old backend container if exists..."
+            docker stop $BACKEND_CONTAINER_NAME || true
+
+            echo "Removing old backend container if exists..."
+            docker rm $BACKEND_CONTAINER_NAME || true
+
+            echo "Starting new backend container..."
+            docker run -d \
+              --name $BACKEND_CONTAINER_NAME \
+              --env-file /home/ec2-user/fairplay-backend/.env \
+              -p $BACKEND_PORT:$BACKEND_PORT \
+              --restart unless-stopped \
+              $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+            echo "Cleaning old unused Docker images..."
+            docker image prune -f
+
+            echo "Deployment completed."
+            docker ps
