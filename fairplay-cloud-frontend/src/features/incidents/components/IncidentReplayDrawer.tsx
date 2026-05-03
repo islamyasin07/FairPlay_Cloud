@@ -1,5 +1,7 @@
 import StatusBadge from "../../../components/ui/StatusBadge";
 import type { IncidentRecord, IncidentStatus } from "../../../types/dashboard";
+import { getSecureMediaUrl } from "../../../services/mediaAuthService";
+import { useState, useEffect } from "react";
 
 type IncidentReplayDrawerProps = {
   incident: IncidentRecord | null;
@@ -38,6 +40,37 @@ function IncidentReplayDrawer({
   onStatusChange,
   isUpdating = false,
 }: IncidentReplayDrawerProps) {
+  const [secureVideo, setSecureVideo] = useState<string | null>(null);
+  const [secureThumbnail, setSecureThumbnail] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (incident?.evidenceVideo && isOpen) {
+      getSecureMediaUrl(incident.evidenceVideo).then(url => {
+        if (isMounted) setSecureVideo(url);
+      });
+    } else {
+      setTimeout(() => {
+        if (isMounted) setSecureVideo(null);
+      }, 0);
+    }
+    return () => { isMounted = false; };
+  }, [incident?.evidenceVideo, isOpen]);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (incident?.evidenceThumbnail && isOpen) {
+      getSecureMediaUrl(incident.evidenceThumbnail).then(url => {
+        if (isMounted) setSecureThumbnail(url || undefined);
+      });
+    } else {
+      setTimeout(() => {
+        if (isMounted) setSecureThumbnail(undefined);
+      }, 0);
+    }
+    return () => { isMounted = false; };
+  }, [incident?.evidenceThumbnail, isOpen]);
+
   return (
     <>
       <div
@@ -118,17 +151,17 @@ function IncidentReplayDrawer({
                   </p>
 
                   <div className="mt-4 overflow-hidden rounded-3xl border border-slate-800 bg-black">
-                    {incident.evidenceVideo ? (
+                    {secureVideo ? (
                       <video
                         controls
                         className="h-[220px] w-full bg-black object-cover sm:h-[260px]"
-                        poster={incident.evidenceThumbnail}
+                        poster={secureThumbnail}
                       >
-                        <source src={incident.evidenceVideo} />
+                        <source src={secureVideo} />
                       </video>
                     ) : (
                       <div className="flex h-[220px] items-center justify-center text-sm text-slate-500 sm:h-[260px]">
-                        No evidence video available.
+                        No evidence video available or loading...
                       </div>
                     )}
                   </div>
