@@ -1,3 +1,4 @@
+import { useState } from "react";
 import StatusBadge from "../../../components/ui/StatusBadge";
 import { useHealthData } from "../hooks/useHealthData";
 import LoadingState from "../../../components/ui/LoadingState";
@@ -23,7 +24,8 @@ function queueTone(state: string) {
 }
 
 function SystemHealthPanel() {
-  const { data, isLoading, isError } = useHealthData();
+  const { data, isLoading, isError, refetch } = useHealthData();
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -58,11 +60,26 @@ function SystemHealthPanel() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div />
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-400">{lastUpdated ? `Last updated ${lastUpdated}` : ""}</span>
+          <button
+            onClick={async () => {
+              await refetch();
+              setLastUpdated(new Date().toLocaleTimeString());
+            }}
+            className="rounded-2xl border border-slate-800 bg-slate-900/60 px-3 py-1 text-sm text-slate-200"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {data.metrics.map((metric: ReliabilityMetric) => (
           <div
             key={metric.label}
-            className="glass-panel rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:border-cyan-500/20"
+            className="glass-panel ambient-glow rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:border-cyan-500/20"
           >
             <p className="text-sm text-slate-400">{metric.label}</p>
             <div className="mt-3 flex items-center justify-between gap-3">
