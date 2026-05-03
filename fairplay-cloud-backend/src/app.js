@@ -7,11 +7,33 @@ import healthRoutes from "./routes/healthRoutes.js";
 import caseCommandRoutes from "./routes/caseCommandRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import observabilityRoutes from "./routes/observabilityRoutes.js";
+import mediaRoutes from "./routes/mediaRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com"
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+app.options("*", cors({
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com"
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -28,5 +50,6 @@ app.use("/players", requireAuth, playerRoutes);
 app.use("/audit", requireAuth, auditRoutes);
 app.use("/health", healthRoutes);
 app.use("/case-commands", requireAuth, caseCommandRoutes);
+app.use("/media", requireAuth, mediaRoutes);
 
 export default app;
