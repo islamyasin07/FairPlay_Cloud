@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import StatusBadge from "../../../components/ui/StatusBadge";
 import { useAuditRecords } from "../hooks/useAuditRecords";
 import type { AuditRecord } from "../../../types/dashboard";
@@ -16,6 +17,45 @@ function actionTone(actionType: string) {
 
 function AuditTimeline() {
   const { data: records = [], isLoading, isError } = useAuditRecords();
+
+  const [query, setQuery] = useState("");
+
+  const filteredRecords = useMemo(() => {
+    if (!query) return records;
+    const q = query.toLowerCase().trim();
+    return records.filter((r) => {
+      return (
+        r.actionType?.toLowerCase().includes(q) ||
+        r.summary?.toLowerCase().includes(q) ||
+        r.actor?.toLowerCase().includes(q) ||
+        String(r.incidentId ?? "").toLowerCase().includes(q) ||
+        String(r.playerName ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [records, query]);
+
+  function exportCSV() {
+    const rows = (filteredRecords || []).map((r) => [
+      r.timestampRelative,
+      r.actionType,
+      r.actor,
+      r.incidentId ?? "",
+      r.playerName ?? "",
+      '"' + (String(r.summary || "").replace(/"/g, '""')) + '"',
+    ]);
+
+    const header = ["time", "action", "actor", "incidentId", "playerName", "summary"];
+    const csv = [header, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "audit-records.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
 
 if (isLoading) {
   return (
@@ -46,7 +86,32 @@ if (records.length === 0) {
 
   return (
     <div className="space-y-4">
-      {records.map((record: AuditRecord, index: number) => (
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search audit (actor, action, incident, player)"
+          className="w-full max-w-md rounded-2xl border border-white/8 bg-slate-950/40 px-4 py-2 text-sm text-slate-200 outline-none"
+        />
+        <div className="flex-shrink-0">
+          <button
+            type="button"
+            onClick={exportCSV}
+            className="rounded-2xl bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-200 border border-cyan-500/10"
+          >
+            Export CSV
+          </button>
+        </div>
+      </div>
+
+      {filteredRecords.length === 0 && (
+        <EmptyState
+          title="No matching records"
+          description="Try a broader search or clear the filter."
+        />
+      )}
+
+      {filteredRecords.map((record: AuditRecord, index: number) => (
         <div key={record.actionId} className="relative flex gap-4">
           <div className="relative flex flex-col items-center">
             <div className="z-10 mt-1 h-3.5 w-3.5 rounded-full bg-cyan-400 shadow-[0_0_14px_rgba(34,211,238,0.6)]" />

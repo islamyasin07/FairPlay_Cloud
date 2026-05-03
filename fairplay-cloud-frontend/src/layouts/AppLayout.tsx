@@ -33,7 +33,7 @@ function BrandBlock({ compact = false }: { compact?: boolean }) {
 
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-cyan-400 drop-shadow-[0_0_12px_rgba(34,211,238,0.18)]">
-            FairPlay Cloud
+            FairPlay Console
           </h1>
           <p className="mt-1 text-sm text-slate-400">
             Anti-Cheat Moderator Console
