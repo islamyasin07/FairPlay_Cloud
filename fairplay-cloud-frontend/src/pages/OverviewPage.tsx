@@ -299,6 +299,8 @@ function OverviewPage() {
           </div>
         </SectionCard>
       </div>
+
+      <div className="mt-8 text-center text-xs text-slate-500">v.1.0</div>
     </>
   );
 }
