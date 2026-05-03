@@ -127,9 +127,7 @@ function LoginPage() {
                   </p>
                 </div>
 
-                <div className="hidden rounded-2xl border border-cyan-400/15 bg-cyan-400/10 p-3 sm:block">
-                  <Globe className="h-6 w-6 text-cyan-200" />
-                </div>
+
               </div>
 
               {/* gateway / descriptor removed to simplify login UI */}
