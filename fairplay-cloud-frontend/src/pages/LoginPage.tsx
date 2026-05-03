@@ -1,14 +1,11 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import {
   ArrowRight,
-  BadgeCheck,
   Eye,
   EyeOff,
-  Globe,
   Lock,
   Mail,
   Shield,
-  Sparkles,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
