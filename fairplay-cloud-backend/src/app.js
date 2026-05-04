@@ -1,13 +1,47 @@
 import express from "express";
 import cors from "cors";
+
 import { requestTelemetry } from "./middleware/requestTelemetryMiddleware.js";
 import { env } from "./config/env.js";
+import incidentRoutes from "./routes/incidentRoutes.js";
+import playerRoutes from "./routes/playerRoutes.js";
+import auditRoutes from "./routes/auditRoutes.js";
+import healthRoutes from "./routes/healthRoutes.js";
+import caseCommandRoutes from "./routes/caseCommandRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import observabilityRoutes from "./routes/observabilityRoutes.js";
+import mediaRoutes from "./routes/mediaRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
 import { mountedRouteDefinitions } from "./config/routeRegistry.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com",
+    "https://faiplay.online",
+    "https://www.faiplay.online"
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+app.options("*", cors({
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com",
+    "https://faiplay.online",
+    "https://www.faiplay.online"
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(requestTelemetry);
 
@@ -64,5 +98,11 @@ mountedRouteDefinitions.forEach((definition) => {
 
   app.use(definition.basePath, definition.router);
 });
+app.use("/incidents", requireAuth, incidentRoutes);
+app.use("/players", requireAuth, playerRoutes);
+app.use("/audit", requireAuth, auditRoutes);
+app.use("/health", healthRoutes);
+app.use("/case-commands", requireAuth, caseCommandRoutes);
+app.use("/media", requireAuth, mediaRoutes);
 
 export default app;

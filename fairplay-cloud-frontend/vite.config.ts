@@ -44,6 +44,12 @@ export default defineConfig({
             }
           });
         },
+
+      '/api': {
+        target: 'http://35.174.0.74:3001',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
     fs: {
