@@ -12,7 +12,7 @@ import { requireAuth } from "./middleware/authMiddleware.js";
 
 const app = express();
 
-app.use(cors({
+const corsOptions = {
   origin: [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -23,20 +23,11 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
-}));
+};
 
-app.options("*", cors({
-  origin: [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com",
-    "https://faiplay.online",
-    "https://www.faiplay.online"
-  ],
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+app.use(cors(corsOptions));
+// Fix for Express 5.x routing wildcard
+app.options(/(.*)/, cors(corsOptions));
 
 app.use(express.json());
 
