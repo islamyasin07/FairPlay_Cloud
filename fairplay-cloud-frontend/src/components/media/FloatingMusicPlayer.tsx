@@ -59,7 +59,11 @@ function FloatingMusicPlayer({
       audio
         .play()
         .then(() => setIsPlaying(true))
-        .catch((error) => console.error("Playback failed:", error));
+        .catch((error) => {
+          // Autoplay may be blocked by browser policy until user interacts
+          console.warn("Playback blocked until user interaction:", error);
+          setIsPlaying(false);
+        });
     }
   }, [currentTrackIndex, currentTrack, isPlaying]);
 

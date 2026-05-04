@@ -154,10 +154,12 @@ function IncidentReplayDrawer({
                     {secureVideo ? (
                       <video
                         controls
+                        playsInline
                         className="h-[220px] w-full bg-black object-cover sm:h-[260px]"
                         poster={secureThumbnail}
                       >
                         <source src={secureVideo} />
+                        Your browser does not support the video tag.
                       </video>
                     ) : (
                       <div className="flex h-[220px] items-center justify-center text-sm text-slate-500 sm:h-[260px]">

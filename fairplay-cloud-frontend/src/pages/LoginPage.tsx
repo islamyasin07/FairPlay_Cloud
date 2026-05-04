@@ -48,9 +48,7 @@ function LoginPage() {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  useEffect(() => {
-    void videoRef.current?.play?.().catch(() => {});
-  }, []);
+  // User must interact with the document before playing video due to browser autoplay policies
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#07111f] text-white">
@@ -63,7 +61,6 @@ function LoginPage() {
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover opacity-40"
             src="/media/login-cs2.mp4"
-            autoPlay
             muted
             loop
             playsInline

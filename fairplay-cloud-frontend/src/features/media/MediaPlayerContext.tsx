@@ -54,9 +54,12 @@ const DEFAULT_STATE: MediaPlayerState = {
 export function MediaPlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [tracks, setTracks] = useState<MusicTrack[]>(DEFAULT_MUSIC_TRACKS);
-  const [state, setState] = useState<MediaPlayerState>(() =>
-    loadMediaPlayerState(DEFAULT_STATE)
-  );
+  // Always start with isPlaying: false to prevent autoplay without user interaction
+  // Restore other state from localStorage, but NOT isPlaying
+  const [state, setState] = useState<MediaPlayerState>(() => {
+    const stored = loadMediaPlayerState(DEFAULT_STATE);
+    return { ...stored, isPlaying: false };
+  });
 
   const currentTrack = useMemo(() => tracks[state.currentTrackIndex], [tracks, state.currentTrackIndex]);
 
@@ -74,7 +77,11 @@ export function MediaPlayerProvider({ children }: { children: ReactNode }) {
     if (!audio) return;
 
     if (state.isPlaying) {
-      void audio.play();
+      audio.play().catch((error) => {
+        // Autoplay may be blocked by browser policy until user interacts
+        console.warn("Autoplay blocked until user interaction:", error);
+        setState((prev) => ({ ...prev, isPlaying: false }));
+      });
     } else {
       audio.pause();
     }
