@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Menu, X, Shield } from "lucide-react";
 import StatusBadge from "../components/ui/StatusBadge";
@@ -48,8 +48,16 @@ function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout } = useAuth();
 
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
   return (
-    <div className="relative h-screen overflow-hidden bg-slate-950 text-white">
+    <div className="relative min-h-dvh overflow-hidden bg-slate-950 text-white">
       <div className="ambient-cloud ambient-cloud-a left-[-120px] top-[120px] h-[260px] w-[260px]" />
       <div className="ambient-cloud ambient-cloud-b right-[-80px] top-[40px] h-[220px] w-[220px]" />
       <div className="ambient-cloud ambient-cloud-a bottom-[80px] left-[30%] h-[180px] w-[180px]" />
@@ -76,7 +84,7 @@ function AppLayout() {
         )}
 
         <aside
-          className={`glass-panel fixed left-0 top-0 z-30 flex h-dvh w-72 flex-col border-r border-slate-800/70 p-6 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
+          className={`glass-panel fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r border-slate-800/70 p-6 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
             mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >

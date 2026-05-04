@@ -1,7 +1,25 @@
 import type { CaseCommandRecord, CaseQueueStatus } from "../types/dashboard";
 import { apiFetch } from "./api";
 
-function mapCaseRecord(record: any): CaseCommandRecord {
+type CaseCommandRecordResponse = {
+  caseId: string;
+  incidentId: string;
+  playerId: string;
+  playerName: string;
+  region: string;
+  cheatType: CaseCommandRecord["cheatType"];
+  severity: CaseCommandRecord["severity"];
+  riskScore: number | string;
+  priority: CaseCommandRecord["priority"];
+  queueStatus: CaseCommandRecord["queueStatus"];
+  assignee?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  slaDueAt: string;
+};
+
+function mapCaseRecord(record: CaseCommandRecordResponse): CaseCommandRecord {
   return {
     caseId: record.caseId,
     incidentId: record.incidentId,
@@ -28,7 +46,7 @@ export async function getCaseCommandRecords(): Promise<CaseCommandRecord[]> {
     throw new Error("Failed to fetch case commands");
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as CaseCommandRecordResponse[];
   return data.map(mapCaseRecord);
 }
 
@@ -54,7 +72,7 @@ export async function updateCaseCommandRecord(
     throw new Error("Failed to update case command record");
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as CaseCommandRecordResponse;
   return mapCaseRecord(data);
 }
 
@@ -74,7 +92,7 @@ export async function bootstrapCaseCommands(limit = 200): Promise<{
     throw new Error("Failed to bootstrap case commands");
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as { createdCount: number; records?: CaseCommandRecordResponse[] };
 
   return {
     createdCount: data.createdCount,

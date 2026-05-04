@@ -1,5 +1,8 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -100,7 +103,12 @@ export function MediaPlayerProvider({ children }: { children: ReactNode }) {
     };
 
     const handleEnded = () => {
-      nextTrack();
+      setState((prev) => ({
+        ...prev,
+        currentTrackIndex:
+          tracks.length > 0 ? (prev.currentTrackIndex + 1) % tracks.length : 0,
+        currentTime: 0,
+      }));
     };
 
     audio.addEventListener("timeupdate", updateTime);
@@ -112,7 +120,7 @@ export function MediaPlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("loadedmetadata", updateTime);
     };
-  }, []);
+  }, [tracks]);
 
   useEffect(() => {
     saveMediaPlayerState(state);
@@ -156,16 +164,16 @@ export function MediaPlayerProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const nextTrack = () => {
+  const nextTrack = useCallback(() => {
     setState((prev) => ({
       ...prev,
       currentTrackIndex:
         tracks.length > 0 ? (prev.currentTrackIndex + 1) % tracks.length : 0,
       currentTime: 0,
     }));
-  };
+  }, [tracks.length]);
 
-  const previousTrack = () => {
+  const previousTrack = useCallback(() => {
     setState((prev) => ({
       ...prev,
       currentTrackIndex:
@@ -174,7 +182,7 @@ export function MediaPlayerProvider({ children }: { children: ReactNode }) {
           : 0,
       currentTime: 0,
     }));
-  };
+  }, [tracks.length]);
 
   const value = useMemo(
     () => ({
@@ -198,7 +206,7 @@ export function MediaPlayerProvider({ children }: { children: ReactNode }) {
       setTracks,
       currentTrack,
     }),
-    [state, tracks, currentTrack]
+    [state, tracks, currentTrack, nextTrack, previousTrack]
   );
 
   return (

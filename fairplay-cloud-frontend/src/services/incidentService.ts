@@ -1,7 +1,26 @@
 import type { IncidentRecord, IncidentStatus } from "../types/dashboard";
 import { apiFetch } from "./api";
 
-function mapIncident(incident: any): IncidentRecord {
+type IncidentRecordResponse = {
+  incidentId: string;
+  playerId: string;
+  playerName: string;
+  matchId: string;
+  cheatType: IncidentRecord["cheatType"];
+  severity: IncidentRecord["severity"];
+  status: IncidentStatus;
+  riskScore: number | string;
+  region: string;
+  detectionReason: string;
+  createdAt?: string;
+  createdAtRelative?: string;
+  evidenceVideo?: string;
+  evidenceThumbnail?: string;
+  metrics?: IncidentRecord["metrics"];
+  timeline?: IncidentRecord["timeline"];
+};
+
+function mapIncident(incident: IncidentRecordResponse): IncidentRecord {
   return {
     incidentId: incident.incidentId,
     playerId: incident.playerId,
@@ -28,7 +47,7 @@ export async function getIncidentRecords(): Promise<IncidentRecord[]> {
     throw new Error("Failed to fetch incidents");
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as IncidentRecordResponse[];
   return data.map(mapIncident);
 }
 
@@ -48,6 +67,6 @@ export async function updateIncidentStatus(
     throw new Error("Failed to update incident status");
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as IncidentRecordResponse;
   return mapIncident(data);
 }

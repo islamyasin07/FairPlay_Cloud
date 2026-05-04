@@ -1,6 +1,19 @@
 import type { PlayerRiskRecord } from "../types/dashboard";
 import { apiFetch } from "./api";
 
+type PlayerRiskRecordResponse = {
+  playerId: string;
+  username: string;
+  region: string;
+  riskScore: number | string;
+  status: PlayerRiskRecord["status"];
+  totalIncidents: number | string;
+  primaryPattern: PlayerRiskRecord["primaryPattern"];
+  lastSeen: string;
+  ipAddress?: string;
+  "IP address"?: string;
+};
+
 export async function getPlayerRiskRecords(): Promise<PlayerRiskRecord[]> {
   const response = await apiFetch("/players");
 
@@ -8,9 +21,9 @@ export async function getPlayerRiskRecords(): Promise<PlayerRiskRecord[]> {
     throw new Error("Failed to fetch players");
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as PlayerRiskRecordResponse[];
 
-  return data.map((player: any) => ({
+  return data.map((player) => ({
     playerId: player.playerId,
     username: player.username,
     region: player.region,

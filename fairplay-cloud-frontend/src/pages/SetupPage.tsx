@@ -92,7 +92,7 @@ function SetupPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#07111f] text-white">
+    <div className="relative min-h-dvh overflow-hidden bg-[#07111f] text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.16),transparent_28%),linear-gradient(180deg,rgba(8,15,28,0.65),rgba(4,8,16,0.92))]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:42px_42px] opacity-25" />
 
