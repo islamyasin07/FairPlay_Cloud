@@ -6,6 +6,7 @@ import type {
   EndpointTestResult,
   EndpointTestScenario,
   HttpMethod,
+  ObservabilitySourceSummary,
   ObservabilitySnapshot,
   RequestLogRecord,
   ResourcePoint,
@@ -31,6 +32,14 @@ function normalizeRoutes(routes: unknown): ApiRouteRecord[] {
       lastTestResult: item.lastTestResult ?? "Failed",
       averageLatencyMs: Number(item.averageLatencyMs ?? 0),
       lastCheckedAt: item.lastCheckedAt ?? "Not available",
+      requestCount: Number(item.requestCount ?? 0),
+      lastObservedStatusCode:
+        typeof item.lastObservedStatusCode === "number"
+          ? item.lastObservedStatusCode
+          : null,
+      lastObservedAt: item.lastObservedAt ?? item.lastCheckedAt ?? "Not available",
+      source:
+        item.source === "runtime_telemetry" ? "runtime_telemetry" : "service_metrics",
     };
   });
 }
@@ -157,6 +166,26 @@ function normalizeRequestLogs(logs: unknown): RequestLogRecord[] {
   });
 }
 
+function normalizeSourceSummary(value: unknown): ObservabilitySourceSummary {
+  const item = (value ?? {}) as Partial<ObservabilitySourceSummary>;
+
+  return {
+    snapshotGeneratedAt: item.snapshotGeneratedAt ?? "Not available",
+    dataFreshness: item.dataFreshness ?? "Not available",
+    entityCounts: {
+      players: Number(item.entityCounts?.players ?? 0),
+      incidents: Number(item.entityCounts?.incidents ?? 0),
+      auditLogs: Number(item.entityCounts?.auditLogs ?? 0),
+      healthMetrics: Number(item.entityCounts?.healthMetrics ?? 0),
+    },
+    telemetry: {
+      recentRequests: Number(item.telemetry?.recentRequests ?? 0),
+      observedRoutes: Number(item.telemetry?.observedRoutes ?? 0),
+      catalogRoutes: Number(item.telemetry?.catalogRoutes ?? 0),
+    },
+  };
+}
+
 function normalizeSnapshot(data: unknown): ObservabilitySnapshot {
   const snapshot = (data ?? {}) as Partial<ObservabilitySnapshot>;
 
@@ -169,6 +198,7 @@ function normalizeSnapshot(data: unknown): ObservabilitySnapshot {
     resourceTrend: normalizeResourceTrend(snapshot.resourceTrend),
     trafficTrend: normalizeTrafficTrend(snapshot.trafficTrend),
     requestLogs: normalizeRequestLogs(snapshot.requestLogs),
+    source: normalizeSourceSummary(snapshot.source),
   };
 }
 

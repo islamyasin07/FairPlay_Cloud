@@ -22,6 +22,10 @@ export const observabilityRoutes: ApiRouteRecord[] = [
     lastTestResult: "Passed",
     averageLatencyMs: 118,
     lastCheckedAt: "2026-04-24 19:42 UTC",
+    requestCount: 24,
+    lastObservedStatusCode: 200,
+    lastObservedAt: "2026-04-24 19:42 UTC",
+    source: "runtime_telemetry",
   },
   {
     id: "dashboard-overview",
@@ -34,6 +38,10 @@ export const observabilityRoutes: ApiRouteRecord[] = [
     lastTestResult: "Passed",
     averageLatencyMs: 84,
     lastCheckedAt: "2026-04-24 19:41 UTC",
+    requestCount: 31,
+    lastObservedStatusCode: 200,
+    lastObservedAt: "2026-04-24 19:41 UTC",
+    source: "runtime_telemetry",
   },
   {
     id: "incidents-create",
@@ -46,6 +54,10 @@ export const observabilityRoutes: ApiRouteRecord[] = [
     lastTestResult: "Warning",
     averageLatencyMs: 236,
     lastCheckedAt: "2026-04-24 19:39 UTC",
+    requestCount: 8,
+    lastObservedStatusCode: 202,
+    lastObservedAt: "2026-04-24 19:39 UTC",
+    source: "runtime_telemetry",
   },
   {
     id: "players-list",
@@ -58,6 +70,10 @@ export const observabilityRoutes: ApiRouteRecord[] = [
     lastTestResult: "Passed",
     averageLatencyMs: 97,
     lastCheckedAt: "2026-04-24 19:40 UTC",
+    requestCount: 17,
+    lastObservedStatusCode: 200,
+    lastObservedAt: "2026-04-24 19:40 UTC",
+    source: "runtime_telemetry",
   },
   {
     id: "audit-logs",
@@ -70,6 +86,10 @@ export const observabilityRoutes: ApiRouteRecord[] = [
     lastTestResult: "Passed",
     averageLatencyMs: 132,
     lastCheckedAt: "2026-04-24 19:42 UTC",
+    requestCount: 12,
+    lastObservedStatusCode: 200,
+    lastObservedAt: "2026-04-24 19:42 UTC",
+    source: "runtime_telemetry",
   },
   {
     id: "health-check",
@@ -82,6 +102,10 @@ export const observabilityRoutes: ApiRouteRecord[] = [
     lastTestResult: "Passed",
     averageLatencyMs: 41,
     lastCheckedAt: "2026-04-24 19:42 UTC",
+    requestCount: 41,
+    lastObservedStatusCode: 200,
+    lastObservedAt: "2026-04-24 19:42 UTC",
+    source: "service_metrics",
   },
 ];
 
@@ -327,4 +351,19 @@ export const observabilitySnapshot: ObservabilitySnapshot = {
   resourceTrend,
   trafficTrend,
   requestLogs,
+  source: {
+    snapshotGeneratedAt: "2026-04-24T19:42:11.000Z",
+    dataFreshness: "2026-04-24T19:42:11.000Z",
+    entityCounts: {
+      players: 128,
+      incidents: 54,
+      auditLogs: 812,
+      healthMetrics: 27,
+    },
+    telemetry: {
+      recentRequests: 133,
+      observedRoutes: 5,
+      catalogRoutes: 6,
+    },
+  },
 };

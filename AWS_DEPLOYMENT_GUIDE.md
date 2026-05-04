@@ -6,6 +6,7 @@
 - [x] JWT auth properly configured
 - [x] Bootstrap admin setup protected
 - [x] Error handling and logging in place
+- [x] CloudWatch-friendly request telemetry and readiness endpoints added
 - [x] 404 pages and proper routing
 - [x] Privacy: Removed third-party geolocation
 - [x] Health data from backend (not mocked)
@@ -49,6 +50,8 @@ VITE_API_BASE_URL=https://api.yourdomain.com
 - [ ] CloudFront + S3 for frontend static files
 - [ ] SSL certificates (ACM)
 - [ ] Route 53 DNS configuration
+- [ ] CloudWatch log groups, dashboards, and alarms
+- [ ] SNS topic or chat integration for alert notifications
 
 ### 4. Docker Images
 - [x] Backend Dockerfile ready
@@ -79,12 +82,14 @@ Before first admin setup:
 - [ ] Admin bootstrap works only with correct key
 - [ ] Audit logs recorded
 - [ ] Health snapshots captured
+- [ ] `/health/live` works without auth
+- [ ] `/health/ready` returns 200 only when config is complete
+- [ ] `/monitoring` returns runtime and readiness data
 - [ ] All data flows are live (not mocked)
 
 ## ⚠️ Known Gaps (For Next Phase)
 - No automated testing pipeline
 - No database migrations/seeding automation
-- No monitoring/CloudWatch integration
 - No backup strategy documented
 - No disaster recovery plan
 - No load testing done

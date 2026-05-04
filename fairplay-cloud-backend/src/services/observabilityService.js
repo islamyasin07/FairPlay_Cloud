@@ -2,79 +2,11 @@ import { getAllAuditLogs } from "./auditService.js";
 import { getAllHealthMetrics } from "./healthService.js";
 import { getAllIncidents } from "./incidentService.js";
 import { getAllPlayers } from "./playerService.js";
-
-const routeCatalog = [
-  {
-    id: "root-status",
-    path: "/",
-    method: "GET",
-    module: "Core",
-    authRequired: false,
-    description: "Basic backend status response for service reachability.",
-    metricKeywords: ["backend", "api", "gateway", "core"],
-    testable: false,
-  },
-  {
-    id: "observability-snapshot",
-    path: "/observability",
-    method: "GET",
-    module: "Observability",
-    authRequired: false,
-    description: "Aggregated operational snapshot for the admin observability dashboard.",
-    metricKeywords: ["observability", "backend", "api"],
-    testable: true,
-  },
-  {
-    id: "incidents-list",
-    path: "/incidents",
-    method: "GET",
-    module: "Incidents",
-    authRequired: true,
-    description: "Retrieves incident records stored in the incidents table.",
-    metricKeywords: ["incident", "backend", "api"],
-    testable: true,
-  },
-  {
-    id: "players-list",
-    path: "/players",
-    method: "GET",
-    module: "Players",
-    authRequired: true,
-    description: "Retrieves player records from the players table.",
-    metricKeywords: ["player", "backend", "api"],
-    testable: true,
-  },
-  {
-    id: "audit-list",
-    path: "/audit",
-    method: "GET",
-    module: "Audit",
-    authRequired: true,
-    description: "Retrieves audit log records from the audit logs table.",
-    metricKeywords: ["audit", "log", "backend"],
-    testable: true,
-  },
-  {
-    id: "health-list",
-    path: "/health",
-    method: "GET",
-    module: "Health",
-    authRequired: true,
-    description: "Reads health metrics and service checks from the system health table.",
-    metricKeywords: ["health", "uptime", "backend", "database", "storage"],
-    testable: true,
-  },
-  {
-    id: "case-commands-list",
-    path: "/case-commands",
-    method: "GET",
-    module: "Case Command",
-    authRequired: true,
-    description: "Retrieves moderation case command records stored for operational workflows.",
-    metricKeywords: ["case", "queue", "backend"],
-    testable: true,
-  },
-];
+import { getRecentRequestTelemetry } from "./telemetryStore.js";
+import {
+  directRouteDefinitions,
+  mountedRouteDefinitions,
+} from "../config/routeRegistry.js";
 
 function safeDate(value) {
   const date = value ? new Date(value) : null;
@@ -216,16 +148,11 @@ function selectMetricValue(healthMetrics, keywords, fallback) {
   );
 }
 
-function selectMetricNumber(healthMetrics, keywords, fallback) {
-  const selected = selectMetricValue(healthMetrics, keywords, fallback);
-  const parsed = toNumber(selected);
-  return parsed ?? fallback;
-}
-
 function formatCompactNumber(value) {
-  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(
-    value,
-  );
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
 }
 
 function formatGb(valueInKb) {
@@ -260,15 +187,175 @@ function deriveWindowUptime(incidents, audits, players) {
   return days > 0 ? `${days}d ${hours}h tracked` : `${hours}h tracked`;
 }
 
-function buildRequestLogs(auditLogs) {
-  const routeByAction = {
-    "Incident Created": { route: "/incidents", method: "GET", statusCode: 201 },
-    "Status Updated": { route: "/incidents", method: "PATCH", statusCode: 200 },
-    "Player Flagged": { route: "/players", method: "GET", statusCode: 200 },
-    "Player Banned": { route: "/players", method: "GET", statusCode: 200 },
-    "Incident Dismissed": { route: "/incidents", method: "PATCH", statusCode: 200 },
-    "System Note": { route: "/health", method: "GET", statusCode: 200 },
+function slugifyRouteId(value) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function joinRoutePath(basePath, childPath) {
+  if (!childPath || childPath === "/") {
+    return basePath;
+  }
+
+  const normalizedBase = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
+  const normalizedChild = childPath.startsWith("/") ? childPath : `/${childPath}`;
+  return `${normalizedBase}${normalizedChild}`;
+}
+
+function humanizePath(path) {
+  return path
+    .split("/")
+    .filter(Boolean)
+    .map((segment) =>
+      segment.startsWith(":")
+        ? segment.slice(1)
+        : segment.replace(/-/g, " "),
+    )
+    .join(" ");
+}
+
+function buildDynamicDescription({ method, path, module, authRequired }) {
+  const target = humanizePath(path) || module.toLowerCase();
+
+  const actionByMethod = {
+    GET: `Reads ${target}`,
+    POST: `Creates or submits ${target}`,
+    PATCH: `Updates ${target}`,
+    PUT: `Replaces ${target}`,
+    DELETE: `Deletes ${target}`,
   };
+
+  const action = actionByMethod[method] ?? `Handles ${method} for ${target}`;
+  const authText = authRequired ? " Authentication is required." : " Publicly accessible.";
+  return `${action} for the ${module} module.${authText}`;
+}
+
+function extractRoutesFromRouter({ basePath, module, authRequired, router }) {
+  const stack = router?.stack ?? [];
+
+  return stack
+    .filter((layer) => layer.route?.path)
+    .flatMap((layer) => {
+      const routePath = joinRoutePath(basePath, layer.route.path);
+      const methods = Object.keys(layer.route.methods ?? {})
+        .filter((method) => layer.route.methods?.[method])
+        .map((method) => method.toUpperCase());
+
+      return methods.map((method) => ({
+        id: slugifyRouteId(`${method}-${routePath}`),
+        path: routePath,
+        method,
+        module,
+        authRequired,
+        description: buildDynamicDescription({
+          method,
+          path: routePath,
+          module,
+          authRequired,
+        }),
+        testable: routePath !== "/",
+      }));
+    });
+}
+
+function buildRouteCatalog() {
+  const directRoutes = directRouteDefinitions.map((route) => ({
+    id: slugifyRouteId(`${route.method}-${route.path}`),
+    path: route.path,
+    method: route.method,
+    module: route.module,
+    authRequired: route.authRequired,
+    description: buildDynamicDescription(route),
+    testable: route.testable,
+  }));
+
+  const mountedRoutes = mountedRouteDefinitions.flatMap((definition) =>
+    extractRoutesFromRouter(definition),
+  );
+
+  return [...directRoutes, ...mountedRoutes];
+}
+
+function routeMatchesObservedPath(routePath, observedPath) {
+  const routeParts = routePath.split("/");
+  const observedParts = observedPath.split("?");
+  const observedPathParts = observedParts[0].split("/");
+
+  if (routeParts.length !== observedPathParts.length) {
+    return false;
+  }
+
+  return routeParts.every((segment, index) => {
+    if (segment.startsWith(":")) return observedPathParts[index].length > 0;
+    return segment === observedPathParts[index];
+  });
+}
+
+function buildObservedRouteMap(requestLogs, routeCatalog) {
+  return routeCatalog.reduce((accumulator, route) => {
+    const matches = requestLogs.filter(
+      (entry) =>
+        entry.method === route.method &&
+        routeMatchesObservedPath(route.path, entry.path),
+    );
+
+    accumulator.set(route.id, matches);
+    return accumulator;
+  }, new Map());
+}
+
+function buildObservedModuleMap(requestLogs, observedRoutes, routeCatalog) {
+  return routeCatalog.reduce((accumulator, route) => {
+    const directMatches = observedRoutes.get(route.id) ?? [];
+
+    if (directMatches.length > 0) {
+      accumulator.set(route.id, directMatches);
+      return accumulator;
+    }
+
+    const siblingMatches = routeCatalog
+      .filter((candidate) => candidate.module === route.module)
+      .flatMap((candidate) => observedRoutes.get(candidate.id) ?? []);
+
+    if (siblingMatches.length > 0) {
+      accumulator.set(
+        route.id,
+        siblingMatches.sort((a, b) => {
+          const timeA = safeDate(a.timestamp)?.getTime() ?? 0;
+          const timeB = safeDate(b.timestamp)?.getTime() ?? 0;
+          return timeB - timeA;
+        }),
+      );
+      return accumulator;
+    }
+
+    const prefixMatches = requestLogs.filter((entry) => {
+      const basePath = route.path.split("/:")[0];
+      return entry.method === route.method && entry.path.startsWith(basePath);
+    });
+
+    accumulator.set(route.id, prefixMatches);
+    return accumulator;
+  }, new Map());
+}
+
+function normalizeRequestLogs(requestLogs, auditLogs) {
+  if (requestLogs.length > 0) {
+    return requestLogs.slice(0, 24).map((log) => ({
+      id: log.requestId,
+      timestamp: formatIsoToDisplay(log.timestamp),
+      method: log.method,
+      route: log.path,
+      statusCode: log.statusCode,
+      durationMs: log.durationMs,
+      bytesSentKb: Number((1 + log.durationMs / 250).toFixed(1)),
+      bytesReceivedKb: Number((2 + log.durationMs / 180).toFixed(1)),
+      traceId: log.requestId,
+      message: `runtime telemetry ip=${log.ip ?? "unknown"} agent=${log.userAgent ?? "unknown"}`,
+    }));
+  }
 
   return auditLogs
     .slice()
@@ -278,32 +365,30 @@ function buildRequestLogs(auditLogs) {
       return timeB - timeA;
     })
     .slice(0, 8)
-    .map((log, index) => {
-      const mapped = routeByAction[log.actionType] ?? {
-        route: "/audit",
-        method: "GET",
-        statusCode: 200,
-      };
-
-      return {
-        id: log.actionId ?? `audit-log-${index + 1}`,
-        timestamp: formatIsoToDisplay(log.timestamp ?? new Date().toISOString()),
-        method: mapped.method,
-        route: mapped.route,
-        statusCode: mapped.statusCode,
-        durationMs: 80 + index * 14,
-        bytesSentKb: Number((1.2 + index * 0.3).toFixed(1)),
-        bytesReceivedKb: Number((4.8 + index * 1.7).toFixed(1)),
-        traceId: log.actionId ?? `trace-${index + 1}`,
-        message: log.summary ?? "Operational audit event recorded.",
-      };
-    });
+    .map((log, index) => ({
+      id: log.actionId ?? `audit-log-${index + 1}`,
+      timestamp: formatIsoToDisplay(log.timestamp ?? new Date().toISOString()),
+      method: "GET",
+      route: "/audit",
+      statusCode: 200,
+      durationMs: 80 + index * 14,
+      bytesSentKb: Number((1.2 + index * 0.3).toFixed(1)),
+      bytesReceivedKb: Number((4.8 + index * 1.7).toFixed(1)),
+      traceId: log.actionId ?? `trace-${index + 1}`,
+      message: log.summary ?? "Operational audit event recorded.",
+    }));
 }
 
-function buildTrafficTrend(auditLogs, incidents) {
+function buildTrafficTrend(requestLogs, auditLogs, incidents) {
   const grouped = new Map();
 
-  const register = (timestamp, kind) => {
+  const register = ({
+    timestamp,
+    failed = false,
+    durationMs = 0,
+    bytesSentKb = 0,
+    bytesReceivedKb = 0,
+  }) => {
     const date = safeDate(timestamp);
     const key = date
       ? `${String(date.getHours()).padStart(2, "0")}:00`
@@ -321,29 +406,54 @@ function buildTrafficTrend(auditLogs, incidents) {
 
     entry.requests += 1;
     entry.responses += 1;
-    entry.failed += kind === "failed" ? 1 : 0;
-    entry.bytesSentKb += kind === "incident" ? 6 : 2;
-    entry.bytesReceivedKb += kind === "incident" ? 4 : 7;
-    entry.avgRtt += kind === "incident" ? 132 : 98;
+    entry.failed += failed ? 1 : 0;
+    entry.bytesSentKb += bytesSentKb;
+    entry.bytesReceivedKb += bytesReceivedKb;
+    entry.avgRtt += durationMs;
 
     grouped.set(key, entry);
   };
 
-  auditLogs.forEach((log) => {
-    register(log.timestamp, /failed|error/i.test(log.summary ?? "") ? "failed" : "audit");
-  });
+  if (requestLogs.length > 0) {
+    requestLogs.forEach((log) => {
+      register({
+        timestamp: log.timestamp,
+        failed: log.statusCode >= 400,
+        durationMs: log.durationMs,
+        bytesSentKb: 1 + log.durationMs / 250,
+        bytesReceivedKb: 2 + log.durationMs / 180,
+      });
+    });
+  } else {
+    auditLogs.forEach((log) => {
+      register({
+        timestamp: log.timestamp,
+        failed: /failed|error/i.test(log.summary ?? ""),
+        durationMs: 92,
+        bytesSentKb: 2,
+        bytesReceivedKb: 7,
+      });
+    });
 
-  incidents.forEach((incident) => {
-    register(incident.createdAt ?? incident.updatedAt, "incident");
-  });
+    incidents.forEach((incident) => {
+      register({
+        timestamp: incident.createdAt ?? incident.updatedAt,
+        durationMs: 132,
+        bytesSentKb: 6,
+        bytesReceivedKb: 4,
+      });
+    });
+  }
 
   return Array.from(grouped.values())
     .map((entry) => ({
       ...entry,
       avgRtt: entry.requests > 0 ? Math.round(entry.avgRtt / entry.requests) : 0,
+      bytesSentKb: Number(entry.bytesSentKb.toFixed(1)),
+      bytesReceivedKb: Number(entry.bytesReceivedKb.toFixed(1)),
     }))
     .sort((a, b) => a.time.localeCompare(b.time))
-    .slice(-8);
+    .slice(-12);
 }
 
 function buildResourceTrend(healthMetrics, trafficTrend) {
@@ -377,7 +487,8 @@ function buildApplicationHealth(healthMetrics, trafficTrend) {
 
   const totalRequests = trafficTrend.reduce((sum, item) => sum + item.requests, 0);
   const totalFailed = trafficTrend.reduce((sum, item) => sum + item.failed, 0);
-  const computedErrorRate = totalRequests > 0 ? `${((totalFailed / totalRequests) * 100).toFixed(1)}%` : "0.0%";
+  const computedErrorRate =
+    totalRequests > 0 ? `${((totalFailed / totalRequests) * 100).toFixed(1)}%` : "0.0%";
   const uptime = toNonEmptyString(selectFieldValue(healthMetrics, ["uptime"]), "Not reported");
   const memoryUse = toNonEmptyString(
     selectFieldValue(healthMetrics, ["memoryUse", "memory", "ramUsage"]),
@@ -408,10 +519,36 @@ function buildApplicationHealth(healthMetrics, trafficTrend) {
   };
 }
 
-function buildRoutes(healthMetrics, latestCheckedAt) {
+function buildRoutes(routeCatalog, healthMetrics, latestCheckedAt, observedRoutes, observedModules) {
   return routeCatalog.map((route, index) => {
-    const serviceState = collectStatus(healthMetrics, route.metricKeywords);
-    const latency = collectLatency(healthMetrics, route.metricKeywords, 72 + index * 11);
+    const directMatches = observedRoutes.get(route.id) ?? [];
+    const matches =
+      directMatches.length > 0
+        ? directMatches
+        : observedModules.get(route.id) ?? [];
+    const latestObserved = matches[0] ?? null;
+    const observedStatuses = matches.map((item) => item.statusCode);
+    const observedFailures = observedStatuses.filter((statusCode) => statusCode >= 500).length;
+    const observedWarnings = observedStatuses.filter(
+      (statusCode) => statusCode >= 400 && statusCode < 500,
+    ).length;
+
+    let serviceState;
+    if (matches.length > 0) {
+      serviceState =
+        observedFailures > 0
+          ? "Critical"
+          : observedWarnings > 0
+          ? "Warning"
+          : "Healthy";
+    } else {
+      serviceState = collectStatus(healthMetrics, [route.module, route.path, route.id]);
+    }
+
+    const latency =
+      matches.length > 0
+        ? average(matches.map((item) => item.durationMs), 0)
+        : collectLatency(healthMetrics, [route.module, route.path, route.id], 72 + index * 11);
 
     return {
       id: route.id,
@@ -420,11 +557,15 @@ function buildRoutes(healthMetrics, latestCheckedAt) {
       module: route.module,
       authRequired: route.authRequired,
       description: route.description,
-      currentAvailability: stateToAvailability(serviceState),
       availability: stateToAvailability(serviceState),
       lastTestResult: stateToOutcome(serviceState),
       averageLatencyMs: latency,
-      lastCheckedAt: formatIsoToDisplay(latestCheckedAt),
+      lastCheckedAt: formatIsoToDisplay(latestObserved?.timestamp ?? latestCheckedAt),
+      requestCount: matches.length,
+      lastObservedStatusCode:
+        latestObserved?.statusCode ?? stateToStatusCode(serviceState),
+      lastObservedAt: formatIsoToDisplay(latestObserved?.timestamp ?? latestCheckedAt),
+      source: matches.length > 0 ? "runtime_telemetry" : "service_metrics",
     };
   });
 }
@@ -435,7 +576,7 @@ function buildLiveStatuses(routes) {
     .map((route) => ({
       id: `status-${route.id}`,
       routeId: route.id,
-      label: route.module,
+      label: route.path,
       state: stateToOnlineState(
         route.availability === "Available"
           ? "Healthy"
@@ -443,30 +584,34 @@ function buildLiveStatuses(routes) {
           ? "Warning"
           : "Critical",
       ),
-      statusCode: stateToStatusCode(
-        route.availability === "Available"
-          ? "Healthy"
-          : route.availability === "Degraded"
-          ? "Warning"
-          : "Critical",
-      ),
+      statusCode:
+        route.lastObservedStatusCode ??
+        stateToStatusCode(
+          route.availability === "Available"
+            ? "Healthy"
+            : route.availability === "Degraded"
+            ? "Warning"
+            : "Critical",
+        ),
       latencyMs: route.averageLatencyMs,
-      lastCheckedAt: route.lastCheckedAt,
+      lastCheckedAt: route.lastObservedAt ?? route.lastCheckedAt,
       success: route.availability !== "Offline",
     }));
 }
 
 function buildEndpointTests(routes) {
   return routes
-    .filter((route) => routeCatalog.find((item) => item.id === route.id)?.testable)
+    .filter((route) => route.testable)
     .map((route) => ({
       id: `test-${route.id}`,
-      label: `${route.module} ${route.method}`,
+      label: `${route.method} ${route.path}`,
       routeId: route.id,
       method: route.method,
       payloadTemplate:
         route.method === "GET"
           ? JSON.stringify({ sample: true }, null, 2)
+          : route.path === "/auth/login"
+          ? JSON.stringify({ email: "admin@fairplay.local", password: "password123" }, null, 2)
           : JSON.stringify({ status: "Under Review" }, null, 2),
       description: route.description,
     }));
@@ -507,6 +652,7 @@ function buildCommunicationMetrics(routes, trafficTrend, healthMetrics, playersC
 }
 
 export async function getObservabilitySnapshot() {
+  const routeCatalog = buildRouteCatalog();
   const [players, incidents, auditLogs, healthMetrics] = await Promise.all([
     getAllPlayers(),
     getAllIncidents(),
@@ -514,17 +660,32 @@ export async function getObservabilitySnapshot() {
     getAllHealthMetrics(),
   ]);
 
+  const runtimeTelemetry = getRecentRequestTelemetry();
   const latestCheckedAt = latestTimestamp(
+    runtimeTelemetry.map((item) => item.timestamp),
     incidents.map((item) => item.updatedAt ?? item.createdAt),
     auditLogs.map((item) => item.timestamp),
     healthMetrics.map((item) => item.updatedAt ?? item.timestamp),
   );
 
-  const routes = buildRoutes(healthMetrics, latestCheckedAt);
-  const trafficTrend = buildTrafficTrend(auditLogs, incidents);
+  const requestLogs = normalizeRequestLogs(runtimeTelemetry, auditLogs);
+  const observedRoutes = buildObservedRouteMap(runtimeTelemetry, routeCatalog);
+  const observedModules = buildObservedModuleMap(
+    runtimeTelemetry,
+    observedRoutes,
+    routeCatalog,
+  );
+  const routes = buildRoutes(
+    routeCatalog,
+    healthMetrics,
+    latestCheckedAt,
+    observedRoutes,
+    observedModules,
+  );
+  const trafficTrend = buildTrafficTrend(runtimeTelemetry, auditLogs, incidents);
   const resourceTrend = buildResourceTrend(healthMetrics, trafficTrend);
-  const requestLogs = buildRequestLogs(auditLogs);
   const derivedHealth = buildApplicationHealth(healthMetrics, trafficTrend);
+  const observedRouteCount = routes.filter((route) => route.requestCount > 0).length;
 
   return {
     routes,
@@ -536,8 +697,6 @@ export async function getObservabilitySnapshot() {
         derivedHealth.uptime === "Not reported"
           ? deriveWindowUptime(incidents, auditLogs, players)
           : derivedHealth.uptime,
-      memoryUse: derivedHealth.memoryUse,
-      cpuLoad: derivedHealth.cpuLoad,
       requestErrorRate: toNonEmptyString(derivedHealth.requestErrorRate, formatPercent(0)),
     },
     communicationMetrics: buildCommunicationMetrics(
@@ -550,10 +709,19 @@ export async function getObservabilitySnapshot() {
     trafficTrend,
     requestLogs,
     source: {
-      players: players.length,
-      incidents: incidents.length,
-      auditLogs: auditLogs.length,
-      healthMetrics: healthMetrics.length,
+      snapshotGeneratedAt: new Date().toISOString(),
+      dataFreshness: formatIsoToDisplay(latestCheckedAt),
+      entityCounts: {
+        players: players.length,
+        incidents: incidents.length,
+        auditLogs: auditLogs.length,
+        healthMetrics: healthMetrics.length,
+      },
+      telemetry: {
+        recentRequests: runtimeTelemetry.length,
+        observedRoutes: observedRouteCount,
+        catalogRoutes: routeCatalog.length,
+      },
     },
   };
 }
