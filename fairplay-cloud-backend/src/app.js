@@ -48,5 +48,3 @@ app.get("/api/health", (req, res) => res.status(200).send("OK")); // Removed DB 
 app.use("/case-commands", requireAuth, caseCommandRoutes);
 app.use("/media", requireAuth, mediaRoutes);
 export default app;
-
-export default app;
