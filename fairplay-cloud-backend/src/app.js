@@ -16,7 +16,9 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com"
+    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com",
+    "https://faiplay.online",
+    "https://www.faiplay.online"
   ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -27,7 +29,9 @@ app.options("*", cors({
   origin: [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com"
+    "http://fairplay-cloud-frontend-ui.s3-website-us-east-1.amazonaws.com",
+    "https://faiplay.online",
+    "https://www.faiplay.online"
   ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
