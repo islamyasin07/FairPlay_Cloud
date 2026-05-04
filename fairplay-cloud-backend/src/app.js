@@ -44,7 +44,9 @@ app.use("/incidents", requireAuth, incidentRoutes);
 app.use("/players", requireAuth, playerRoutes);
 app.use("/audit", requireAuth, auditRoutes);
 app.use("/health", healthRoutes);
+app.use("/api/health", healthRoutes); // Added for AWS ALB target group which checks /api/health
 app.use("/case-commands", requireAuth, caseCommandRoutes);
 app.use("/media", requireAuth, mediaRoutes);
+export default app;
 
 export default app;
