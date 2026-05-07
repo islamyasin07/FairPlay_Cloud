@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import {
   ArrowRight,
   Eye,
@@ -47,8 +47,12 @@ function LoginPage() {
   };
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const loginVideoSrc =
+    (import.meta.env.VITE_LOGIN_VIDEO_URL?.trim() || "/media/login-cs2.mp4");
 
-  // User must interact with the document before playing video due to browser autoplay policies
+  useEffect(() => {
+    void videoRef.current?.play?.().catch(() => {});
+  }, []);
 
   return (
     <div className="relative min-h-dvh overflow-hidden bg-[#07111f] text-white">
@@ -60,11 +64,16 @@ function LoginPage() {
           <video
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover opacity-40"
-            src="/media/login-cs2.mp4"
+            src={loginVideoSrc}
+            autoPlay
             muted
             loop
             playsInline
-          />
+            preload="auto"
+            crossOrigin="anonymous"
+          >
+            <source src={loginVideoSrc} type="video/mp4" />
+          </video>
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950/30 via-slate-950/35 to-slate-900/90" />
 
           <div className="relative flex h-full flex-col justify-between p-12">
