@@ -2,6 +2,7 @@ import StatusBadge from "../../../components/ui/StatusBadge";
 import type { IncidentRecord, IncidentStatus } from "../../../types/dashboard";
 import { getSecureMediaUrl } from "../../../services/mediaAuthService";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 type IncidentReplayDrawerProps = {
   incident: IncidentRecord | null;
@@ -232,6 +233,12 @@ function IncidentReplayDrawer({
 
             <div className="shrink-0 border-t border-slate-800 bg-slate-950/98 px-4 py-4 backdrop-blur-xl sm:px-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Link
+                  to={`/app/audit?incidentId=${encodeURIComponent(incident.incidentId)}`}
+                  className="w-full rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-center text-sm font-medium text-cyan-300 transition hover:bg-cyan-500/20 sm:w-auto sm:py-2"
+                >
+                  View Audit Trail
+                </Link>
                 <button
                   disabled={isUpdating}
                   onClick={() => onStatusChange(incident.incidentId, "Under Review")}

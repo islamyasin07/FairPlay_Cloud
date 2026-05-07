@@ -12,8 +12,11 @@ type AuditRecordResponse = {
   timestamp: string;
 };
 
-export async function getAuditRecords(): Promise<AuditRecord[]> {
-  const response = await apiFetch("/audit");
+export async function getAuditRecords(
+  incidentId?: string
+): Promise<AuditRecord[]> {
+  const query = incidentId ? `?incidentId=${encodeURIComponent(incidentId)}` : "";
+  const response = await apiFetch(`/audit${query}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch audit logs");

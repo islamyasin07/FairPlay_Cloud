@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import StatusBadge from "../../../components/ui/StatusBadge";
 import { useAuditRecords } from "../hooks/useAuditRecords";
 import type { AuditRecord } from "../../../types/dashboard";
@@ -16,7 +17,9 @@ function actionTone(actionType: string) {
 }
 
 function AuditTimeline() {
-  const { data: records = [], isLoading, isError } = useAuditRecords();
+  const [searchParams] = useSearchParams();
+  const incidentId = searchParams.get("incidentId")?.trim() || undefined;
+  const { data: records = [], isLoading, isError } = useAuditRecords(incidentId);
 
   const [query, setQuery] = useState("");
 
@@ -57,35 +60,53 @@ function AuditTimeline() {
     URL.revokeObjectURL(url);
   }
 
-if (isLoading) {
-  return (
-    <LoadingState
-      title="Loading audit timeline"
-      description="Preparing recent moderation activity and system actions."
-    />
-  );
-}
+  if (isLoading) {
+    return (
+      <LoadingState
+        title="Loading audit timeline"
+        description="Preparing recent moderation activity and system actions."
+      />
+    );
+  }
 
- if (isError) {
-  return (
-    <ErrorState
-      title="Failed to load audit timeline"
-      description="The audit module could not be loaded at this time."
-    />
-  );
-}
+  if (isError) {
+    return (
+      <ErrorState
+        title="Failed to load audit timeline"
+        description="The audit module could not be loaded at this time."
+      />
+    );
+  }
 
-if (records.length === 0) {
-  return (
-    <EmptyState
-      title="No audit records available"
-      description="No moderation or system actions are currently available."
-    />
-  );
-}
+  if (records.length === 0) {
+    return (
+      <EmptyState
+        title={incidentId ? `No audit records for ${incidentId}` : "No audit records available"}
+        description={
+          incidentId
+            ? "No moderation or system actions were found for the selected incident."
+            : "No moderation or system actions are currently available."
+        }
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">
+      {incidentId ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
+          <span>
+            Showing audit trail for incident <span className="font-semibold">{incidentId}</span>
+          </span>
+          <Link
+            to="/app/audit"
+            className="rounded-xl border border-cyan-500/20 bg-slate-950/40 px-3 py-1.5 text-xs font-medium text-cyan-200 transition hover:bg-slate-950/60"
+          >
+            Clear incident filter
+          </Link>
+        </div>
+      ) : null}
+
       <div className="mb-3 flex items-center justify-between gap-3">
         <input
           value={query}
